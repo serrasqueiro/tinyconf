@@ -75,6 +75,17 @@ class ConfReader(ConfHome):
         return isOk
 
 
+    def text_reader (self, nick, data):
+        assert type( nick )==str
+        if type( data )==str:
+            isOk, content = self._parse_input( data )
+        else:
+            assert False
+        if isOk:
+            self.conf[ nick ] = content
+        return isOk
+
+
     def _parse_input (self, data):
         if type( data )==str:
             inLines = data.split("\n")
@@ -100,9 +111,13 @@ class ConfReader(ConfHome):
                 continue
             row = (nrLine, s)
             payload.append( row )
-            thisVar = self._read_assign( s, assignList )
+            msgs = []
+            thisVar = self._read_assign( s, assignList, msgs )
+            extraStr = ""
+            if msgs:
+                extraStr = ": {}".format( "; ".join( msgs ) )
             if thisVar is None:
-                warnList.append( "line {}: invalid var".format( nrLine ) )
+                warnList.append( "line {}: invalid var{}".format( nrLine, extraStr ) )
         content = {"payload": payload,
                    "warning": warnList,
                    "assignment": assignList,
@@ -110,7 +125,7 @@ class ConfReader(ConfHome):
         return True, content
 
 
-    def _read_assign (self, s, assignList):
+    def _read_assign (self, s, assignList, msgs=[]):
         plus = False
         aDict = assignList[0]
         pos = s.find("=")
@@ -128,10 +143,13 @@ class ConfReader(ConfHome):
             return None
         assert valid_rside( rSide )
         if plus:
-            pass  # ToDo
+            if left not in aDict:
+                msgs.append( "not yet known var ({})".format( left ) )
+                return None
+            assignList.append( (left, "+=", rSide) )
         else:
             aDict[ left ] = rSide
-            assignList.append( (left, rSide) )
+            assignList.append( (left, "=", rSide) )
         return left
 
 
@@ -201,5 +219,7 @@ if __name__ == "__main__":
         print("""confreader.py test-letter [...]
 
 a           Basic test.
+
+See also: confreader.test.py !
 """)
-    sys.exit(0)
+    sys.exit(code)
