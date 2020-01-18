@@ -43,7 +43,16 @@ backup_files+=my.tar
             else:
                 print(left, right)
             print("")
+    bConfig.update()
+    idx = 0
+    for items in (bConfig.vars.items(),
+                  bConfig.varList.items()):
+        idx += 1
+        for var, value in items:
+            if var.find(":")==-1:
+                print("var{}: '{}' is: {}".format( "" if idx<=1 else "List", var, value ))
     return 0
+
 
 
 # Main script

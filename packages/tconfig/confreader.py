@@ -32,8 +32,11 @@ def test_confreader (outFile, errFile, inArgs):
 #
 class ConfHome():
     def _init_conf_home (self, autoConf=False):
+        self.lastPath = None
         self.homeDir = None
+        self.homeDirRewrite = "allow"
         self.basicEncoding="ISO-8859-1"
+        self.sepMultipleValue = ";"
         if autoConf: self._set_config()
 
 
@@ -41,7 +44,11 @@ class ConfHome():
         self.set_home()
 
 
-    def set_home (self):
+    def set_home (self, newHome=None):
+        if newHome is not None:
+            self.homeDir = newHome
+            self.vars["HOME"] = newHome
+            return True
         try:
             userProfile = os.environ[ "USERPROFILE" ]
         except:
@@ -52,6 +59,7 @@ class ConfHome():
         isOk = isDir
         if isDir:
             self.homeDir = userProfile
+        self.vars["HOME"] = self.homeDir
         return isOk
 
 
@@ -62,11 +70,19 @@ class ConfReader(ConfHome):
     def __init__ (self, autoConf=False):
         self._init_conf_home( autoConf )
         self.conf = dict()
+        self.paths = dict()
+        self.vars, self.varList = dict(), dict()
+        self.varTuples = []
+
+
+    def config_vars (self):
+        return self.varTuples
 
 
     def reader (self, name, nick=None, autoHome=True):
         if nick is None: nick = name
         p = os.path.join( self.homeDir, name ) if autoHome else name
+        self.lastPath = self.paths[ nick ] = p
         with open(p, "r", encoding=self.basicEncoding) as f:
             data = f.read()
         isOk, content = self._parse_input( data )
@@ -83,6 +99,22 @@ class ConfReader(ConfHome):
             assert False
         if isOk:
             self.conf[ nick ] = content
+        return isOk
+
+
+    def update (self, nick=None, doAll=True):
+        isOk = True
+        if nick is None:
+            if doAll:
+                for nick in self.conf.keys():
+                    assert nick is not None
+                    isOk = self.update( nick, False )
+                    assert isOk
+            return isOk
+        vars, varList = self._update_vars( self.conf[nick]["assignment"] )
+        isOk = vars is not None
+        self.vars, self.varList = vars, varList
+        self.varTuples = self._tuples_from_vars( self.vars )
         return isOk
 
 
@@ -151,6 +183,72 @@ class ConfReader(ConfHome):
             aDict[ left ] = rSide
             assignList.append( (left, "=", rSide) )
         return left
+
+
+    def _update_vars (self, assignList, debug=0):
+        vars = dict()
+        varList = dict()
+        assigns = assignList[1:]
+        hdr = self.homeDirRewrite
+        for a in assigns:
+            left, eq, right = a
+            assert left!="HOME"
+            newHome = right
+            if left=="home":
+                if hdr=="allow":
+                    self.set_home( newHome )
+                else:
+                    assert False
+        cache = self._cache_vars()
+        for a in assigns:
+            left, eq, right = a
+            leftList = "list"+":"+left
+            s = self._subst_var(right, cache)
+            if eq=="=":
+                if debug>0: print("Debug: assign L=R: {}={}".format( left, s ))
+                vars[ left ] = s
+                vars[ leftList ] = [ s ]
+                varList[ left ] = [ s ]
+            elif eq=="+=":
+                there = vars[ left ]
+                there += self.sepMultipleValue
+                there += s
+                vars[ left ] = there
+                vars[ leftList ].append( s )
+                varList[ left ].append( s )
+            else:
+                assert False
+        return vars, varList
+
+
+    def _cache_vars (self):
+        assert self.homeDir[-1]!="/"
+        cache = {"$HOME/": self.homeDir+"/",
+                 }
+        return cache
+
+
+    def _tuples_from_vars (self, vars, debug=0):
+        aList = []
+        _, ks = sorted_dict( vars )
+        for aVar in ks:
+            value = vars[ aVar ]
+            if aVar.find(":")!=-1: continue
+            if debug>0: print("Debug: var {}={}".format( aVar, value ))
+            aList.append( (aVar, value) )
+        return aList
+
+
+    def _subst_var (self, s, cache):
+        r = s
+        for k, val in cache.items():  # k='$HOME', ...etc.
+            keep = None
+            while r!=keep:
+                keep = r
+                pos = r.find( k )
+                if pos>=0:
+                    r = r.replace(k, val)
+        return r
 
 
 #
