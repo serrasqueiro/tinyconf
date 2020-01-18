@@ -9,6 +9,7 @@ from sys import stdin, stdout, stderr
 import os
 from commands import *
 from confreader import *
+from archs.packs import *
 
 
 
@@ -117,6 +118,7 @@ def listing (outFile, errFile, cmd, direx, pnames, opts, debug=0):
         _, newPath = change_dir( originDir )
         if newPath is None:
             errFile.write("Bogus dir: {}\n".format( originDir ))
+    countFail = 0
 
     for q in pnames:
         tList, msg = None, None
@@ -164,7 +166,6 @@ def listing (outFile, errFile, cmd, direx, pnames, opts, debug=0):
                 shown = pName if verbose<=0 else os.path.join( originDir, pName )
                 outFile.write("{}\n".format( shown ))
         elif cmd=="check":
-            msg = "ok"
             assert tList is not None
             if debug>0:
                 print("Debug:", cmd, "{} (ext={}, {})".format(p, ext, aStat))
@@ -172,20 +173,39 @@ def listing (outFile, errFile, cmd, direx, pnames, opts, debug=0):
                     print(":::\t{}".format( aLine ))
                 print("homeDir:", homeDir)
                 print("originDir:", originDir)
-            """
-            for tup in tList:
-                pName, size = tup
+            for pName, size in tList:
                 myPath = os.path.join(originDir, safe_name(pName))
                 isOk = os.path.isfile(myPath)
-                print("p:", p, "<-ok-" if isOk else "?", pName)
-            """
-            for pName, size in tList:
-                myPath = pName
-                isOk = os.path.isfile(myPath)
-                print("p:", p, "<-ok-" if isOk else "?", pName)
+                print("p:", q if verbose<=0 else p, "<-ok-" if isOk else "?", pName if verbose<=0 else myPath)
+                countFail += int( not isOk )
+        elif cmd=="cmp":  # compare
+            msg = "ok"
+            pack = FilePack( p, aStat )
+            for pName in pack.subs:
+                myPath = os.path.join(originDir, safe_name(pName))
+                assert pName in pack.subs
+                isThere = os.path.isfile(myPath)
+                miniCRC = pack.simple_content( pName )
+                if verbose>0:
+                    print("Checking {} ...{}".format( myPath, "" if isThere else "(not there)" ))
+                if isThere:
+                    inp = ATextFile( myPath )
+                    bogus = inp.text_read()==""
+                    assert not bogus
+                    thereCRC = inp.calc_mini_crc()
+                else:
+                    thereCRC = -1
+                textualHint, _ = pack.lastCRC
+                isOk = miniCRC==thereCRC
+                sTic = " "*2
+                sNotOk = "NotOk" + ("" if textualHint=="txt" else "(b)")
+                print(".." if isThere else ".!", "OK" if isOk else sNotOk, "{:.>5} {}{}".format( miniCRC, sTic, pName ))
+                countFail += int( not isOk )
         if msg!="ok":
             return None
         lists[ q ].append( ("zip", tList) )
+    if countFail>0:
+        errFile.write("Number of failures: {}\n".format( countFail ))
     return lists
 
 
