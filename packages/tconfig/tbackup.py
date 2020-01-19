@@ -126,6 +126,8 @@ def processor (outFile, errFile, cmd, param, opts, debug=0):
         lists = {"@files": None}
         code = update_zip(outFile, zipBkp, direx, lists, opts)
         return code
+    elif cmd=="latest":
+        pass
     else:
         return None
 
@@ -317,6 +319,11 @@ def listing (outFile, errFile, cmd, direx, pnames, opts, debug=0):
                     countFail += 1
             if verbose>0 and countFail<=0:
                 print("Compared {} file(s), all ok.".format( countOk ))
+        elif cmd=="latest":  # compare
+            msg = "ok"
+            pack = FilePack( p, aStat )
+            for row in pack.orderedList:
+                print(row)
         if msg!="ok":
             return None
         lists[ q ].append( ("zip", tList) )

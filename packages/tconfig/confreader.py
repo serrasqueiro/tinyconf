@@ -134,7 +134,7 @@ class ConfReader(ConfHome):
                     assert isOk
             return isOk
         msg = self._update_vars( self.conf[nick]["assignment"] )
-        if debug>=0: print("Debug: update():", msg)
+        if debug>0: print("Debug: update():", msg)
         assert msg==""
         self.varTuples = self._tuples_from_vars( self.vars )
         return isOk

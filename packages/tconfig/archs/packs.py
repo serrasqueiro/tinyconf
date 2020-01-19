@@ -6,6 +6,7 @@ Module that handles file packs, such as zip-files.
 
 
 from zipfile import ZipFile
+from yadate import *
 
 
 #
@@ -88,7 +89,7 @@ class ATextFile(GenFile):
 class FilePack(GenFile):
     def __init__ (self, name, aStat=None, nick=None, autoOpen=True):
         self.init_genfile( name, aStat, nick )
-        self.subs = []
+        self.subs, self.zipFileList, self.orderedList = [], [], []
         self.magic = dict()  # simple magic info, or any kind of CRC
         self.isZip = False
         if autoOpen:
@@ -99,7 +100,7 @@ class FilePack(GenFile):
         if aKind=="zip":
             self.isZip = True
             z = ZipFile( self.pathName )
-            self.subs = z.namelist()
+            self._update_from_zipinfo(z.namelist(), z.filelist, z)
         else:
             z = open(self.name, "rb")
         self.handler = z
@@ -135,6 +136,18 @@ class FilePack(GenFile):
         miniCRC = self.calc_mini_crc()
         self.magic[ subName ] = miniCRC
         return miniCRC
+
+
+    def _update_from_zipinfo (self, nameList, fileList, z=None):
+        self.subs, self.zipFileList, self.orderedList = nameList, fileList, []
+        sOrder = []
+        for elem in fileList:
+            yDate = GenFDate( elem.date_time )
+            s = "{} {}".format( yDate, elem.filename )
+            sOrder.append( s )
+        sOrder.sort()
+        self.orderedList = sOrder
+        return True
 
 
 #
