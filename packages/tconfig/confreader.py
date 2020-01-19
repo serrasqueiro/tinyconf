@@ -93,7 +93,8 @@ class ConfReader(ConfHome):
                     self._update_var(left, "+=", a)
         elif type( right ) in (str, int, float):
             s = "{}".format( right )
-            self._update_var(left, "=", s)
+            isOk = self._update_var(left, "=", s)
+            if not isOk: return False
         else:
             assert False
         self.varTuples = self._tuples_from_vars( self.vars )
@@ -123,7 +124,7 @@ class ConfReader(ConfHome):
         return isOk
 
 
-    def update (self, nick=None, doAll=True):
+    def update (self, nick=None, doAll=True, debug=0):
         isOk = True
         if nick is None:
             if doAll:
@@ -132,7 +133,9 @@ class ConfReader(ConfHome):
                     isOk = self.update( nick, False )
                     assert isOk
             return isOk
-        self._update_vars( self.conf[nick]["assignment"] )
+        msg = self._update_vars( self.conf[nick]["assignment"] )
+        if debug>=0: print("Debug: update():", msg)
+        assert msg==""
         self.varTuples = self._tuples_from_vars( self.vars )
         return isOk
 
@@ -204,7 +207,15 @@ class ConfReader(ConfHome):
         return left
 
 
-    def _update_vars (self, assignList, debug=1):
+    def _update_vars (self, assignList, debug=0):
+        """
+        Parameters
+        ----------
+        assignList : a list with [0]: dictionary, and [1:]: textual assignments
+            The number of legs the animal (default is 4)
+
+        Returns: an empty string, or a string with an error message.
+        """
         assigns = assignList[1:]
         hdr = self.homeDirRewrite
         for a in assigns:
@@ -221,6 +232,8 @@ class ConfReader(ConfHome):
             left, eq, right = a
             if left!="HOME":
                 isOk = self._update_var( left, eq, right, cache )
+                if not isOk:
+                     return "Invalid var: {}".format( right )
                 assert isOk
                 sLefts = []
                 sLefts.append( "${}/".format( left ) )
@@ -231,7 +244,7 @@ class ConfReader(ConfHome):
                     lastChr = sLeft[-1]
                     cache[ sLeft ] = right+lastChr
                 assert left
-        return True
+        return ""
 
 
     def _update_var (self, left, eq, right, aCache=None, debug=0):
@@ -241,6 +254,8 @@ class ConfReader(ConfHome):
         else:
             cache = aCache
         s = self._subst_var(right, cache)
+        if os.name!="nt":
+            if s.find("\\")>=0: return False
         if eq=="=":
             if debug>0: print("Debug: assign L=R: {}={}".format( left, s ))
             self.vars[ left ] = s
@@ -255,7 +270,7 @@ class ConfReader(ConfHome):
             self.varList[ left ].append( s )
             if debug>0: print("Debug: assign L+=R: {}={};\n\tvars:{}\n\tvarList:{}\n".format( left, s, self.vars[left], self.varList[left] ))
         else:
-            return False
+            assert False
         return True
 
 

@@ -320,7 +320,7 @@ def listing (outFile, errFile, cmd, direx, pnames, opts, debug=0):
         if msg!="ok":
             return None
         lists[ q ].append( ("zip", tList) )
-    if countFail>0:
+    if countFail:
         errFile.write("Number of failures: {}\n".format( countFail ))
     return lists
 
