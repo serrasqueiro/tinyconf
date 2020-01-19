@@ -79,6 +79,27 @@ class ConfReader(ConfHome):
         return self.varTuples
 
 
+    def add_var (self, left, right, checkExists=False):
+        assert type(checkExists)==bool
+        if checkExists:
+            isThere = left in self.vars
+            if isThere: return False
+        if type( right ) in (list, tuple):
+            if len(right)<=0:
+                self._update_var(left, "=", "")
+            else:
+                self._update_var(left, "=", right[0])
+                for a in right[1:]:
+                    self._update_var(left, "+=", a)
+        elif type( right ) in (str, int, float):
+            s = "{}".format( right )
+            self._update_var(left, "=", s)
+        else:
+            assert False
+        self.varTuples = self._tuples_from_vars( self.vars )
+        return True
+
+
     def reader (self, name, nick=None, autoHome=True):
         if nick is None: nick = name
         p = os.path.join( self.homeDir, name ) if autoHome else name
@@ -111,9 +132,7 @@ class ConfReader(ConfHome):
                     isOk = self.update( nick, False )
                     assert isOk
             return isOk
-        vars, varList = self._update_vars( self.conf[nick]["assignment"] )
-        isOk = vars is not None
-        self.vars, self.varList = vars, varList
+        self._update_vars( self.conf[nick]["assignment"] )
         self.varTuples = self._tuples_from_vars( self.vars )
         return isOk
 
@@ -185,16 +204,14 @@ class ConfReader(ConfHome):
         return left
 
 
-    def _update_vars (self, assignList, debug=0):
-        vars = dict()
-        varList = dict()
+    def _update_vars (self, assignList, debug=1):
         assigns = assignList[1:]
         hdr = self.homeDirRewrite
         for a in assigns:
             left, eq, right = a
-            assert left!="HOME"
+            assert left!="home"
             newHome = right
-            if left=="home":
+            if left=="HOME":
                 if hdr=="allow":
                     self.set_home( newHome )
                 else:
@@ -202,23 +219,35 @@ class ConfReader(ConfHome):
         cache = self._cache_vars()
         for a in assigns:
             left, eq, right = a
-            leftList = "list"+":"+left
-            s = self._subst_var(right, cache)
-            if eq=="=":
-                if debug>0: print("Debug: assign L=R: {}={}".format( left, s ))
-                vars[ left ] = s
-                vars[ leftList ] = [ s ]
-                varList[ left ] = [ s ]
-            elif eq=="+=":
-                there = vars[ left ]
-                there += self.sepMultipleValue
-                there += s
-                vars[ left ] = there
-                vars[ leftList ].append( s )
-                varList[ left ].append( s )
-            else:
-                assert False
-        return vars, varList
+            if left!="HOME":
+                isOk = self._update_var( left, eq, right, cache )
+                assert isOk
+        return True
+
+
+    def _update_var (self, left, eq, right, aCache=None, debug=0):
+        leftList = "list:"+left
+        if aCache is None:
+            cache = self._cache_vars()
+        else:
+            cache = aCache
+        s = self._subst_var(right, cache)
+        if eq=="=":
+            if debug>0: print("Debug: assign L=R: {}={}".format( left, s ))
+            self.vars[ left ] = s
+            self.vars[ leftList ] = [ s ]
+            self.varList[ left ] = [ s ]
+        elif eq=="+=":
+            there = self.vars[ left ]
+            there += self.sepMultipleValue
+            there += s
+            self.vars[ left ] = there
+            self.vars[ leftList ].append( s )
+            self.varList[ left ].append( s )
+            if debug>0: print("Debug: assign L+=R: {}={};\n\tvars:{}\n\tvarList:{}\n".format( left, s, self.vars[left], self.varList[left] ))
+        else:
+            return False
+        return True
 
 
     def _cache_vars (self):
