@@ -222,6 +222,15 @@ class ConfReader(ConfHome):
             if left!="HOME":
                 isOk = self._update_var( left, eq, right, cache )
                 assert isOk
+                sLefts = []
+                sLefts.append( "${}/".format( left ) )
+                if os.name=="nt":
+                    sLefts.append( "${}\\".format( left ) )
+                for sLeft in sLefts:
+                    assert sLeft!=""
+                    lastChr = sLeft[-1]
+                    cache[ sLeft ] = right+lastChr
+                assert left
         return True
 
 

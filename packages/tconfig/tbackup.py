@@ -47,6 +47,10 @@ def main (outFile, errFile, inArgs):
     # Option adjustments
     opts["verbose"] = verbose
 
+    # Adjustments
+    if "origin_dir" not in bConfig.vars:
+        pass
+
     # Main processing
     if cmd=="config":
         aConf = bConfig
@@ -103,8 +107,8 @@ def processor (outFile, errFile, cmd, param, opts, debug=0):
     # Build local vars:
     homeDir = aConf.homeDir
     zipBkp = aConf.vars["zip_bkp"]
-    originDir = aConf.vars["tec_dir"]
-    continueAlways = False
+    originDir = aConf.vars["origin_dir"]
+    tecDir = aConf.vars["tec_dir"]
 
     if cmd in("check",
               "cmp",
@@ -118,7 +122,7 @@ def processor (outFile, errFile, cmd, param, opts, debug=0):
             return None
     elif cmd=="back":
         assert param==[]
-        direx = (homeDir, originDir)
+        direx = (homeDir, originDir, tecDir)
         lists = {"@files": None}
         code = update_zip(outFile, zipBkp, direx, lists, opts)
         return code
@@ -126,7 +130,7 @@ def processor (outFile, errFile, cmd, param, opts, debug=0):
         return None
 
     # Command run
-    direx = (homeDir, originDir)
+    direx = (homeDir, originDir, tecDir)
     lists = listing(outFile, errFile, cmd, direx, (zipBkp,), opts, debug)
     if lists is None:
         return 1
@@ -143,14 +147,14 @@ def update_zip (outFile, zipName, direx, lists, opts=None, debug=0):
     code = 0
     verbose = opts["verbose"]
     doForce = opts["force"]
-    homeDir, originDir = direx
+    homeDir, originDir, tecDir = direx
     zipBkp = zipName
     os.chdir( originDir )
     toAdd = []
 
     for q in (zipBkp,):
         misses = 0
-        p = os.path.join(path_name(homeDir), q)
+        p = os.path.join(path_name(tecDir), q)
         zipName = p
         pack = FilePack( zipName )
         names = pack.subs
@@ -205,20 +209,20 @@ def listing (outFile, errFile, cmd, direx, pnames, opts, debug=0):
     assert errFile is not None
     lists = dict()
     verbose = opts["verbose"]
-    assert len(direx)==2
-    homeDir, originDir = direx
+    assert len(direx)==3
+    homeDir, originDir, tecDir = direx
 
     if cmd in ("check",
                ):
         _, newPath = change_dir( originDir )
         if newPath is None:
             errFile.write("Bogus dir: {}\n".format( originDir ))
-    countFail = 0
+    countFail, countOk = None, None
 
     for q in pnames:
         tList, msg = None, None
         lists[ q ] = []
-        p = q if homeDir is None else os.path.join(path_name(homeDir), q)
+        p = os.path.join(path_name(tecDir), q)
         pos = p.rfind(".")
         ext = p[pos:] if pos>0 else ""
         if os.path.isfile( p ):
@@ -235,16 +239,18 @@ def listing (outFile, errFile, cmd, direx, pnames, opts, debug=0):
                 tList = run_cmd(s, None, showCmd=True)
                 idx = 0
                 aTemp = None
+                zipDumpLimit = "-" * 5
                 for a in tList:
                     idx += 1
                     u = a.strip()
                     if u=="": continue
-                    if u.startswith("---------"):
+                    # In Windows may be: ' ------    ----    ----    ----'
+                    if u.startswith(zipDumpLimit):
                         aTemp = tList[idx:]
                         idx = 0
                         for a in aTemp:
                             u = a.strip()
-                            if u.startswith("---------"):
+                            if u.startswith(zipDumpLimit):
                                 del aTemp[ idx: ]
                                 break
                             idx += 1
@@ -268,14 +274,21 @@ def listing (outFile, errFile, cmd, direx, pnames, opts, debug=0):
                     print(":::\t{}".format( aLine ))
                 print("homeDir:", homeDir)
                 print("originDir:", originDir)
+            countFail, countOk = 0, 0
             for pName, size in tList:
                 myPath = os.path.join(originDir, safe_name(pName))
                 isOk = os.path.isfile(myPath)
                 print("p:", q if verbose<=0 else p, "<-ok-" if isOk else "?", pName if verbose<=0 else myPath)
-                countFail += int( not isOk )
+                if isOk:
+                    countOk += 1
+                else:
+                    countFail += 1
+            if verbose > 0 and countFail <= 0:
+                print("Checked {} file(s), all there.".format(countOk))
         elif cmd=="cmp":  # compare
             msg = "ok"
             pack = FilePack( p, aStat )
+            countFail, countOk = 0, 0
             for pName in pack.subs:
                 myPath = os.path.join(originDir, safe_name(pName))
                 assert pName in pack.subs
@@ -298,7 +311,12 @@ def listing (outFile, errFile, cmd, direx, pnames, opts, debug=0):
                     print(".." if isThere else ".!", "OK" if isOk else sNotOk, "{:.>5} {}{}".format( miniCRC, sTic, pName ))
                 else:
                     print(".." if isThere else ".!", "OK" if isOk else sNotOk, "{}{}".format( sTic, pName ))
-                countFail += int( not isOk )
+                if isOk:
+                    countOk += 1
+                else:
+                    countFail += 1
+            if verbose>0 and countFail<=0:
+                print("Compared {} file(s), all ok.".format( countOk ))
         if msg!="ok":
             return None
         lists[ q ].append( ("zip", tList) )
