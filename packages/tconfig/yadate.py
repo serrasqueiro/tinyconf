@@ -7,6 +7,8 @@ Yet another Date module!
 import copy
 import datetime
 
+# pylint: disable=invalid-name, pointless-string-statement, missing-function-docstring, no-self-use
+
 
 #
 # CLASS GenFDate
@@ -15,10 +17,10 @@ class GenFDate():
     def __init__ (self, aDate=None):
         if aDate is None:
             s = "-"
-        elif type(aDate)==tuple:
+        elif isinstance(aDate, tuple):
             s = self.date_from(aDate)
-        elif type(aDate)==str:
-            if aDate=="now":
+        elif isinstance(aDate, str):
+            if aDate == "now":
                 s = self.conv_datetime(datetime.datetime.now())
             else:
                 s = aDate
@@ -31,14 +33,14 @@ class GenFDate():
         if aDate is None:
             return "-"
         h, m, s = 0, 0, 0
-        if type( aDate )==tuple:
+        if isinstance(aDate, tuple):
             if len(aDate)==3:
                 year, month, day = aDate
             elif len(aDate)==6:
                 year, month, day, h, m, s = aDate
             else:
                 assert False
-        elif type( aDate )==int:
+        elif isinstance(aDate, int):
             v = aDate
             if v>=2000*100*100 and v<2200*100*100:
                 s = str(v)
@@ -82,12 +84,12 @@ class GenFDate():
     def conv_datetime (self, aDtTm, hasTime=True):
         if isinstance(aDtTm, datetime.datetime):
             year, month, day, h, m, s, _ = aDtTm.year, aDtTm.month, aDtTm.day, aDtTm.hour, aDtTm.minute, aDtTm.second, aDtTm.microsecond
-        elif type( aDtTm ) in (tuple, list):
+        elif isinstance(aDtTm, (tuple, list)):
             if hasTime:
                 year, month, day, h, m, s = aDtTm
             else:
                 year, month, day = aDtTm
-        elif type( aDtTm )==int:
+        elif isinstance(aDtTm, int):
             newDateTime = self.conv_from_timestamp( aDtTm )
             assert isinstance(newDateTime, datetime.datetime)
             s = self.conv_datetime( newDateTime )
@@ -107,9 +109,9 @@ class GenFDate():
 
 
     def get_iso_date (self, s):
-        if type( s )==int:
-            aDtTm = conv_from_timestamp(s)
-        elif type( s )==str:
+        if isinstance(s, int):
+            aDtTm = self.conv_from_timestamp(s)
+        elif isinstance(s, str):
             aDtTm = datetime.datetime.fromisoformat(s)
         else:
             assert False
@@ -151,8 +153,8 @@ Follow basic tests.
     #isOk = f"{yDate}"==f"{zDate}"
     isOk = "{}".format( yDate )=="{}".format( zDate )
     assert isOk
-    s = "GenFDate('now')={}, yDate={}".format( xDate, yDate )
-    print("Message", s)
+    sMsg = "GenFDate('now')={}, yDate={}".format( xDate, yDate )
+    print("Message", sMsg)
     w = xDate.get_iso_date("2020-01-19 12:58:59")
     print("ISO date:", w)
     assert str(w)==t

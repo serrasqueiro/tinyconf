@@ -1,5 +1,5 @@
 """
-Module for handling short backups.
+Pipe-open, command execution
 
 (c)2020  Henrique Moreira (part of 'tconfig')
 """
@@ -16,7 +16,7 @@ import subprocess
 #
 def run_cmd (cmd, outFile=sys.stdout, showCmd=False, autoSubst=True):
     res = []
-    if type( cmd )==list or type( cmd )==tuple:
+    if isinstance(cmd, (list, tuple)):
         for a in cmd:
             thisLog = run_cmd(a, outFile)
             res += thisLog
@@ -45,9 +45,9 @@ def run_cmd (cmd, outFile=sys.stdout, showCmd=False, autoSubst=True):
 # safe_name()
 #
 def safe_name (s, autoConv=True):
-    if type(s)==str:
+    if isinstance(s, str):
         pass
-    elif type(s)==tuple:
+    elif isinstance(s, tuple):
         res = []
         for x in s:
             y = safe_name(x, autoConv)
@@ -154,12 +154,13 @@ def find_any (aList, anyOf):
     res = []
     for a in aList:
         matches = False
-        if type(anyOf)==tuple:
+        if isinstance(anyOf, tuple):
             for b in anyOf:
                 if a.find( b )>=0:
-                    matched = True
+                    # Matched (not exactly the same)
+                    matches = True
                     break
-        elif type(anyOf)==str:
+        elif isinstance(anyOf, str):
             s = anyOf
             matches = a.find( s )>=0
         else:

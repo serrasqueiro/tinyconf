@@ -4,7 +4,7 @@ Yet another Logger module!
 (c)2020  Henrique Moreira (part of 'tconfig')
 """
 
-from sys import stdout, stdin, stderr
+from sys import stdout
 import os
 from yadate import *
 
@@ -80,10 +80,11 @@ class GenLog():
 
     def _try_text (self, sFile):
         isFile = os.path.isfile( sFile )
+        f = None
         try:
-            f = open(sFile, "r")
+            if isFile: f = open(sFile, "r")
         except:
-            f = None
+            pass
         return f
 
 
@@ -102,7 +103,7 @@ if __name__ == "__main__":
     import sys
     param = sys.argv[1:]
     if param:
-        code = run_test(param)
+        CODE = run_test(param)
     else:
-        code = run_test( [ sys.argv[0] ] )
-    sys.exit(code)
+        CODE = run_test( [ sys.argv[0] ] )
+    sys.exit(CODE)

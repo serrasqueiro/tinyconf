@@ -18,16 +18,21 @@ class DGeneric():
 # CLASS DOrder
 #
 class DOrder(DGeneric):
-    def __init__ (self, data=None, desc=""):
+    def __init__(self, data=None, desc=""):
         self.init_dgeneric( desc )
         self.data, self.keying = self._set_from_dict( data )
 
 
-    def _set_from_dict (self, data):
+    def _set_from_dict(self, data):
         if data is None: return dict(), []
         keys = list( data.keys() )
         keys.sort()
         return data, keys
+
+
+    def get_keys(self):
+        return self.keying
+
 
 #
 # Main script

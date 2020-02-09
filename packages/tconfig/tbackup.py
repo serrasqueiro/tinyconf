@@ -353,8 +353,8 @@ def conv_ziplist (textRows):
 #
 if __name__ == "__main__":
     import sys
-    code = main( stdout, stderr, sys.argv[ 1: ] )
-    if code is None:
+    CODE = main( stdout, stderr, sys.argv[ 1: ] )
+    if CODE is None:
         print("""updater.py COMMAND [options] [file ...]
 Commands are:
     config [parameter]
@@ -368,6 +368,6 @@ Commands are:
     cmp
            -> Compare zip with existing files at origin
 """)
-        code = 0
-    assert type( code )==int
-    sys.exit( code )
+        CODE = 0
+    assert isinstance(CODE, int)
+    sys.exit( CODE )
