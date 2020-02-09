@@ -148,7 +148,9 @@ Follow basic tests.
     zDate = GenFDate()
     zDate.dup( yDate )
     t = str(yDate)
-    assert f"{yDate}"==f"{zDate}"
+    #isOk = f"{yDate}"==f"{zDate}"
+    isOk = "{}".format( yDate )=="{}".format( zDate )
+    assert isOk
     s = "GenFDate('now')={}, yDate={}".format( xDate, yDate )
     print("Message", s)
     w = xDate.get_iso_date("2020-01-19 12:58:59")
