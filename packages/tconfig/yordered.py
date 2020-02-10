@@ -4,33 +4,46 @@ Yet another ordered directionary!
 (c)2020  Henrique Moreira (part of 'tconfig')
 """
 
+# pylint: disable=missing-function-docstring, too-few-public-methods, no-self-use
+
 
 #
-# CLASS DGeneric
+# Abstract CLASS DGeneric
 #
 class DGeneric():
-    def init_dgeneric (self, desc):
-        assert type( desc )==str
-        self.desc = desc
+    """
+    DGeneric, a generic dictionary abstract class
+    """
+    def init_dgeneric (self, aDesc):
+        assert isinstance(aDesc, str)
 
 
 #
 # CLASS DOrder
 #
 class DOrder(DGeneric):
-    def __init__(self, data=None, desc=""):
-        self.init_dgeneric( desc )
+    """
+    Dictionary Order, simplified class
+    """
+    def __init__(self, data=None, aDesc=""):
+        self.init_dgeneric( aDesc )
+        self.desc = aDesc
         self.data, self.keying = self._set_from_dict( data )
 
 
     def _set_from_dict(self, data):
-        if data is None: return dict(), []
+        if data is None:
+            return dict(), []
         keys = list( data.keys() )
         keys.sort()
         return data, keys
 
 
     def get_keys(self):
+        """
+        Get dictionary keys, as a list
+        :return: list
+        """
         return self.keying
 
 

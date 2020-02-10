@@ -6,9 +6,10 @@ Pipe-open, command execution
 
 
 import sys
-from sys import stdout, stderr
 import os
 import subprocess
+
+# pylint: disable=missing-function-docstring, no-self-use
 
 
 #
@@ -21,13 +22,13 @@ def run_cmd (cmd, outFile=sys.stdout, showCmd=False, autoSubst=True):
             thisLog = run_cmd(a, outFile)
             res += thisLog
         return res
-    if type(cmd)==str:
+    if isinstance(cmd, str):
         if autoSubst:
             toRun = split_blanks( cmd )
         else:
             toRun = cmd
         if showCmd:
-            print(">>>", toRun if type(toRun)==str else " ".join(toRun))
+            print(">>>", toRun if isinstance(toRun, str) else " ".join(toRun))
         proc = subprocess.Popen(toRun, stdout=subprocess.PIPE)
         stdout, _ = proc.communicate()
     else:
@@ -60,7 +61,8 @@ def safe_name (s, autoConv=True):
         if s.startswith("/") and s[1].isalpha() and s[2]=="/":
             s = "C:/" + s[3:]
     if isWin:
-        if autoConv: s = s.replace("/", "\\")
+        if autoConv:
+            s = s.replace("/", "\\")
     return s
 
 
@@ -68,7 +70,7 @@ def safe_name (s, autoConv=True):
 # path_name()
 #
 def path_name (s):
-    if type( s )==str:
+    if isinstance(s, str):
         isWin = os.name == "nt"
         if isWin:
             r = s.replace("/", "\\")
@@ -85,20 +87,22 @@ def path_name (s):
 def split_blanks (s):
     res = []
     buf = ""
-    if type( s )==str:
+    if isinstance(s, str):
         q = 0
         for c in s:
             if c=='"':
                 q = int( q==0 )
             elif c==" ":
                 if q==0:
-                    if buf!="": res.append( buf )
+                    if buf!="":
+                        res.append( buf )
                     buf = ""
             else:
                 buf += c
     else:
         assert False
-    if res!="": res.append( buf )
+    if res!="":
+        res.append( buf )
     return res
 
 
@@ -107,10 +111,12 @@ def split_blanks (s):
 #
 def smart_subst (s, whatSubst):
     res = []
-    if whatSubst is None or whatSubst=="": return s
+    if whatSubst is None or whatSubst=="":
+        return s
     tups = s.split( whatSubst )
     for a in tups:
-        if a!="": res.append( a )
+        if a!="":
+            res.append( a )
     return res
 
 
@@ -118,12 +124,12 @@ def smart_subst (s, whatSubst):
 # cut_excess()
 #
 def cut_excess (s, chars=" "):
-    if type( chars )==str:
+    if isinstance(chars, str):
         for y in chars:
             x = y+y
             s = cut_excess(s, ((x, y),))
         return s
-    assert type( chars )==tuple
+    assert isinstance(chars, tuple)
     seqs = chars
     for thisByThat in seqs:
         assert len( thisByThat )==2

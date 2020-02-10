@@ -4,24 +4,25 @@ Module for handling short backups.
 (c)2020  Henrique Moreira (part of 'tconfig')
 """
 
+# pylint: disable=invalid-name, missing-function-docstring, too-many-locals, too-many-branches,
+# pylint: disable=unused-wildcard-import, chained-comparison
 
-from sys import stdin, stdout, stderr
 import os
-from commands import *
-from confreader import *
-from archs.packs import *
-
+import commands
+from commands import safe_name
+from confreader import bConfig, sorted_dict
+import archs.packs as ap
 
 
 #
-# main()
+# run_backup()
 #
-def main (outFile, errFile, inArgs):
+def run_backup (outFile, errFile, inArgs):
     verbose = 0
     debug = 0
     nick = "tec"
     if inArgs==[]:
-        return main(outFile, errFile, ["list"])
+        return run_backup(outFile, errFile, ["list"])
     # Basic configs:
     bConfig.set_home()
     bConfig.reader(".tec.conf", nick)
@@ -91,7 +92,8 @@ def main (outFile, errFile, inArgs):
 
     # Run...!
     code = processor(outFile, errFile, cmd, param, opts)
-    if code is None: return None
+    if code is None:
+        return None
     if verbose>0:
         print("processor() returned: {}".format( code ))
     return code
@@ -102,7 +104,7 @@ def main (outFile, errFile, inArgs):
 #
 def processor (outFile, errFile, cmd, param, opts, debug=0):
     code = 0
-    verbose = opts["verbose"]
+    #verbose = opts["verbose"]
     aConf = opts["config"]
     # Build local vars:
     homeDir = aConf.homeDir
@@ -136,8 +138,8 @@ def processor (outFile, errFile, cmd, param, opts, debug=0):
     lists = listing(outFile, errFile, cmd, direx, (zipBkp,), opts, debug)
     if lists is None:
         return 1
-    isOk = len( lists )>0
-    code = int( not isOk )
+    isOk = len(lists)>0
+    code = int(not isOk)
     return code
 
 
@@ -147,27 +149,31 @@ def processor (outFile, errFile, cmd, param, opts, debug=0):
 def update_zip (outFile, zipName, direx, lists, opts=None, debug=0):
     debug = 0
     code = 0
+    assert lists is None or isinstance(lists, dict)
     verbose = opts["verbose"]
     doForce = opts["force"]
     homeDir, originDir, tecDir = direx
+    assert isinstance(homeDir, str)
     zipBkp = zipName
     os.chdir( originDir )
     toAdd = []
 
     for q in (zipBkp,):
         misses = 0
-        p = os.path.join(path_name(tecDir), q)
+        p = os.path.join(commands.path_name(tecDir), q)
         zipName = p
-        pack = FilePack( zipName )
+        pack = ap.FilePack( zipName )
         names = pack.subs
         for name in names:
             pName = name
             fullName = os.path.join( originDir, name )
             isThere = os.path.isfile( fullName )
             sHint = "there" if isThere else "NotThere!"
-            if debug>0: print("zip {} {} @{} hint:{}".format( zipName, pName, originDir, sHint ))
+            if debug>0:
+                print("zip {} {} @{} hint:{}".format( zipName, pName, originDir, sHint ))
             if isThere:
-                if verbose>0: outFile.write("{}\n".format( pName ))
+                if verbose>0:
+                    outFile.write("{}\n".format( pName ))
                 toAdd.append( (zipName, pName) )
             else:
                 misses += 1
@@ -179,10 +185,9 @@ def update_zip (outFile, zipName, direx, lists, opts=None, debug=0):
                 print("Cowardly bailing out...")
                 return 2
     for q in (zipBkp,):
-        for zipName, pName in toAdd:
-            #print("zipName:", zipName, ";", pName)
+        for zName, pName in toAdd:
             assert pName.find(" ")==-1
-            ioLog = run_cmd("zip {} {}".format( zipName, pName ), None)
+            ioLog = commands.run_cmd("zip {} {}".format( zName, pName ), None)
             if verbose>0:
                 print(zip_result_str(ioLog))
     return code
@@ -192,14 +197,14 @@ def update_zip (outFile, zipName, direx, lists, opts=None, debug=0):
 # zip_result_str()
 #
 def zip_result_str (aList):
-    if type( aList )==list:
+    if isinstance(aList, (list, tuple)):
         isOk = len(aList)>0 and aList[-1]==""
         if isOk:
             s = ";".join( aList[:-1] )
         else:
             s = ";".join( aList )
         s = s.replace("updating:", "updated")
-    elif type( aList )==str:
+    elif isinstance(aList, str):
         s = aList
     return s
 
@@ -216,7 +221,7 @@ def listing (outFile, errFile, cmd, direx, pnames, opts, debug=0):
 
     if cmd in ("check",
                ):
-        _, newPath = change_dir( originDir )
+        _, newPath = commands.change_dir( originDir )
         if newPath is None:
             errFile.write("Bogus dir: {}\n".format( originDir ))
     countFail, countOk = None, None
@@ -224,7 +229,7 @@ def listing (outFile, errFile, cmd, direx, pnames, opts, debug=0):
     for q in pnames:
         tList, msg = None, None
         lists[ q ] = []
-        p = os.path.join(path_name(tecDir), q)
+        p = os.path.join(commands.path_name(tecDir), q)
         pos = p.rfind(".")
         ext = p[pos:] if pos>0 else ""
         if os.path.isfile( p ):
@@ -238,20 +243,21 @@ def listing (outFile, errFile, cmd, direx, pnames, opts, debug=0):
             msg = "ok"
             if ext==".zip":
                 s = "unzip -l {}".format( p )
-                tList = run_cmd(s, None, showCmd=True)
+                tList = commands.run_cmd(s, None, showCmd=True)
                 idx = 0
                 aTemp = None
                 zipDumpLimit = "-" * 5
                 for a in tList:
                     idx += 1
                     u = a.strip()
-                    if u=="": continue
+                    if u == "":
+                        continue
                     # In Windows may be: ' ------    ----    ----    ----'
                     if u.startswith(zipDumpLimit):
                         aTemp = tList[idx:]
                         idx = 0
-                        for a in aTemp:
-                            u = a.strip()
+                        for newStr in aTemp:
+                            u = newStr.strip()
                             if u.startswith(zipDumpLimit):
                                 del aTemp[ idx: ]
                                 break
@@ -266,6 +272,7 @@ def listing (outFile, errFile, cmd, direx, pnames, opts, debug=0):
             return None
         if cmd=="list":
             for pName, size in tList:
+                assert size>=-1
                 shown = pName if verbose<=0 else os.path.join( originDir, pName )
                 outFile.write("{}\n".format( shown ))
         elif cmd=="check":
@@ -280,7 +287,9 @@ def listing (outFile, errFile, cmd, direx, pnames, opts, debug=0):
             for pName, size in tList:
                 myPath = os.path.join(originDir, safe_name(pName))
                 isOk = os.path.isfile(myPath)
-                print("p:", q if verbose<=0 else p, "<-ok-" if isOk else "?", pName if verbose<=0 else myPath)
+                print("p:", q if verbose<=0 else p,
+                      "<-ok-" if isOk else "?",
+                      pName if verbose<=0 else myPath)
                 if isOk:
                     countOk += 1
                 else:
@@ -289,7 +298,7 @@ def listing (outFile, errFile, cmd, direx, pnames, opts, debug=0):
                 print("Checked {} file(s), all there.".format(countOk))
         elif cmd=="cmp":  # compare
             msg = "ok"
-            pack = FilePack( p, aStat )
+            pack = ap.FilePack( p, aStat )
             countFail, countOk = 0, 0
             for pName in pack.subs:
                 myPath = os.path.join(originDir, safe_name(pName))
@@ -299,7 +308,7 @@ def listing (outFile, errFile, cmd, direx, pnames, opts, debug=0):
                 if verbose>0:
                     print("Checking {} ...{}".format( myPath, "" if isThere else "(not there)" ))
                 if isThere:
-                    inp = ATextFile( myPath )
+                    inp = ap.ATextFile( myPath )
                     bogus = inp.text_read()==""
                     assert not bogus
                     thereCRC = inp.calc_mini_crc()
@@ -310,9 +319,11 @@ def listing (outFile, errFile, cmd, direx, pnames, opts, debug=0):
                 sTic = " "*2
                 sNotOk = "NotOk" + ("" if textualHint=="txt" else "(b)")
                 if verbose>0:
-                    print(".." if isThere else ".!", "OK" if isOk else sNotOk, "{:.>5} {}{}".format( miniCRC, sTic, pName ))
+                    print(".." if isThere else ".!",
+                          "OK" if isOk else sNotOk, "{:.>5} {}{}".format( miniCRC, sTic, pName ))
                 else:
-                    print(".." if isThere else ".!", "OK" if isOk else sNotOk, "{}{}".format( sTic, pName ))
+                    print(".." if isThere else ".!",
+                          "OK" if isOk else sNotOk, "{}{}".format( sTic, pName ))
                 if isOk:
                     countOk += 1
                 else:
@@ -321,7 +332,7 @@ def listing (outFile, errFile, cmd, direx, pnames, opts, debug=0):
                 print("Compared {} file(s), all ok.".format( countOk ))
         elif cmd=="latest":  # compare
             msg = "ok"
-            pack = FilePack( p, aStat )
+            pack = ap.FilePack( p, aStat )
             for row in pack.orderedList:
                 print(row)
         if msg!="ok":
@@ -338,13 +349,13 @@ def listing (outFile, errFile, cmd, direx, pnames, opts, debug=0):
 def conv_ziplist (textRows):
     res = []
     for a in textRows:
-        u = cut_excess( a ).strip().split(" ")
-        isOk = u[ -2 ].find(":")>=0+2
+        uStr = commands.cut_excess( a ).strip().split(" ")
+        isOk = uStr[ -2 ].find(":")>=0+2
         if not isOk:
-            print("Uops:", u)
+            print("Uops:", uStr)
         assert isOk
-        size = int( u[ 0 ] )
-        res.append( (u[-1], size) )
+        size = int(uStr[ 0 ])
+        res.append((uStr[-1], size))
     return res
 
 
@@ -353,7 +364,7 @@ def conv_ziplist (textRows):
 #
 if __name__ == "__main__":
     import sys
-    CODE = main( stdout, stderr, sys.argv[ 1: ] )
+    CODE = run_backup(sys.stdout, sys.stderr, sys.argv[ 1: ])
     if CODE is None:
         print("""updater.py COMMAND [options] [file ...]
 Commands are:

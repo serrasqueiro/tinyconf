@@ -6,16 +6,21 @@ Yet another Logger module!
 
 from sys import stdout
 import os
-from yadate import *
+import yadate
+
+# pylint: disable=missing-function-docstring, no-self-use
 
 
 #
 # CLASS GenLog
 #
 class GenLog():
-    def __init__ (self, sFile=None, autoRead=True, aDate=None, lines=[]):
+    """
+    Generic Log
+    """
+    def __init__(self, sFile=None, autoRead=True, aDate=None, lines=None):
         self.info = dict()
-        self.lines = lines
+        self.lines = lines if lines is not None else []
         if sFile is None:
             self.stream = None
         else:
@@ -43,7 +48,7 @@ class GenLog():
         idx, idxOk = 0, 0
         sMsgAt = "-"
         if self.info is not None:
-            assert type(self.info)==dict
+            assert isinstance(self.info, dict)
             for a in textList:
                 idx += 1
                 s = a.rstrip()
@@ -64,7 +69,7 @@ class GenLog():
                     when = s[:-1] if s.endswith("Z") else s
                 else:
                     when = sMsgAt
-                finDate = GenFDate(when)
+                finDate = yadate.GenFDate(when)
                 self.info["build"] = (sMsgAt, finDate)
             else:
                 self.info["fail"] = ("failed", "-")
@@ -82,8 +87,9 @@ class GenLog():
         isFile = os.path.isfile( sFile )
         f = None
         try:
-            if isFile: f = open(sFile, "r")
-        except:
+            if isFile:
+                f = open(sFile, "r")
+        except FileNotFoundError:
             pass
         return f
 
@@ -95,15 +101,17 @@ def run_test (param):
     for a in param:
         aLog = GenLog( a )
         aLog.dump()
+    return 0
+
 
 #
 # Main script
 #
 if __name__ == "__main__":
     import sys
-    param = sys.argv[1:]
-    if param:
-        CODE = run_test(param)
+    PARAM = sys.argv[1:]
+    if PARAM:
+        CODE = run_test(PARAM)
     else:
         CODE = run_test( [ sys.argv[0] ] )
     sys.exit(CODE)

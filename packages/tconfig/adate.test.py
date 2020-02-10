@@ -8,7 +8,7 @@
 
 from adate import aDateMaster, CalDate, ShortDate
 
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring, too-many-locals, chained-comparison
 
 
 #

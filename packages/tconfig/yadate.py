@@ -11,10 +11,41 @@ import datetime
 
 
 #
+# run_tests()
+#
+def run_tests():
+    xDate = GenFDate( "now" )
+    yDate = GenFDate( (2020, 1, 19, 12, 58, 59) )
+    zDate = GenFDate()
+    zDate.dup( yDate )
+    t = str(yDate)
+    #isOk = f"{yDate}"==f"{zDate}"
+    isOk = "{}".format( yDate )=="{}".format( zDate )
+    assert isOk
+    sMsg = "GenFDate('now')={}, yDate={}".format( xDate, yDate )
+    print("Message", sMsg)
+    w = xDate.get_iso_date("2020-01-19 12:58:59")
+    print("ISO date:", w)
+    assert str(w)==t
+    assert yDate.date==zDate.date
+    try:
+        t = zDate.str_date(30200215)
+    except ValueError:
+        t = None
+    assert t is None
+    t = zDate.str_date(20200215)
+    print("zDate' is: {}, (type: {})".format(t, type(t)))
+
+
+#
 # CLASS GenFDate
 #
 class GenFDate():
+    """
+    GenFDate is a generic functional Date class
+    """
     def __init__ (self, aDate=None):
+        self.date = None
         if aDate is None:
             s = "-"
         elif isinstance(aDate, tuple):
@@ -42,12 +73,12 @@ class GenFDate():
                 assert False
         elif isinstance(aDate, int):
             v = aDate
-            if v>=2000*100*100 and v<2200*100*100:
+            if 2000*100*100 <= v < 2200*100*100:
                 s = str(v)
             elif v==0:
                 s = "-"
             else:
-                assert False
+                raise ValueError
             return s
         else:
             print("Bogus type:", type(aDate))
@@ -63,11 +94,13 @@ class GenFDate():
 
 
     def date_from (self, tup, hasTime=None):
-        if type( tup )==tuple:
+        if isinstance(tup, (list, tuple)):
             if len(tup)==3:
-                if hasTime is None: hasTime = False
+                if hasTime is None:
+                    hasTime = False
             elif len(tup)==6:
-                if hasTime is None: hasTime = True
+                if hasTime is None:
+                    hasTime = True
             else:
                 assert False
             if hasTime:
@@ -83,7 +116,8 @@ class GenFDate():
 
     def conv_datetime (self, aDtTm, hasTime=True):
         if isinstance(aDtTm, datetime.datetime):
-            year, month, day, h, m, s, _ = aDtTm.year, aDtTm.month, aDtTm.day, aDtTm.hour, aDtTm.minute, aDtTm.second, aDtTm.microsecond
+            year, month, day = aDtTm.year, aDtTm.month, aDtTm.day
+            h, m, s, _ = aDtTm.hour, aDtTm.minute, aDtTm.second, aDtTm.microsecond
         elif isinstance(aDtTm, (tuple, list)):
             if hasTime:
                 year, month, day, h, m, s = aDtTm
@@ -103,7 +137,7 @@ class GenFDate():
 
 
     def conv_from_timestamp (self, aStamp):
-        assert type( aStamp )==int
+        assert isinstance(aStamp, int)
         aDtTm = datetime.datetime.fromtimestamp(aStamp)
         return aDtTm
 
@@ -127,7 +161,7 @@ class GenFDate():
 
 
     def _set_date_time (self, aDate):
-        assert type( aDate )==str
+        assert isinstance(aDate, str)
         s = aDate
         self.date = s
         return s!="-"
@@ -145,17 +179,4 @@ if __name__ == "__main__":
 
 Follow basic tests.
 """)
-    xDate = GenFDate( "now" )
-    yDate = GenFDate( (2020, 1, 19, 12, 58, 59) )
-    zDate = GenFDate()
-    zDate.dup( yDate )
-    t = str(yDate)
-    #isOk = f"{yDate}"==f"{zDate}"
-    isOk = "{}".format( yDate )=="{}".format( zDate )
-    assert isOk
-    sMsg = "GenFDate('now')={}, yDate={}".format( xDate, yDate )
-    print("Message", sMsg)
-    w = xDate.get_iso_date("2020-01-19 12:58:59")
-    print("ISO date:", w)
-    assert str(w)==t
-    assert yDate.date==zDate.date
+    run_tests()

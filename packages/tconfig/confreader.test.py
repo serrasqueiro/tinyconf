@@ -4,13 +4,17 @@ Module for testing confreader.py
 (c)2020  Henrique Moreira (part of 'tconfig')
 """
 
-from confreader import *
+from confreader import bConfig, sorted_dict
+
+# pylint: disable=missing-function-docstring, invalid-name
 
 
 #
 # test_confreader()
 #
-def test_confreader (outFile, errFile, inArgs):
+def test_confreader(outFile, errFile, inArgs):
+    assert outFile is not None
+    assert errFile is not None
     bConfig.set_home()
     if inArgs==[]:
         config = """
@@ -24,7 +28,8 @@ backup_files+=my.tar
     else:
         assert len(inArgs)==1
         pName = inArgs[0]
-        if pName=="-h": return None
+        if pName=="-h":
+            return None
         isOk = bConfig.reader( pName )
     if not isOk:
         print("Invalid, nick:", list( bConfig.conf.keys() ))
@@ -37,7 +42,7 @@ backup_files+=my.tar
         for a in x:
             left, right = a
             if left=="assignment":
-                aDict, rest = right[0], right[1:]
+                _, rest = right[0], right[1:]
                 for q in rest:
                     print("assignment:", q)
             else:
@@ -59,11 +64,11 @@ backup_files+=my.tar
 
 if __name__ == "__main__":
     import sys
-    from sys import stdin, stdout, stderr, argv
-    code = test_confreader(stdout, stderr, argv[1:])
-    if code is None:
+    from sys import stdout, stderr, argv
+    CODE = test_confreader(stdout, stderr, argv[1:])
+    if CODE is None:
         print("""confreader.test.py [config-file]
 """)
     else:
-        assert code==0
+        assert CODE == 0
     sys.exit(0)
