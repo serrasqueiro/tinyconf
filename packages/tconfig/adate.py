@@ -105,7 +105,7 @@ class CalDate(AnyDate):
         self.init_anydate()
         self.firstValidDate = 1970 * 10**4
         self.xdate = 0
-        if xDate==0:
+        if xDate == 0:
             self.errorCode = 2
         else:
             self.errorCode = not self.from_xdate( xDate )[ 0 ]
@@ -122,15 +122,15 @@ class CalDate(AnyDate):
         #   where:  [1]  ISO 8601 Basic and Extended Notations
         #
         if isinstance(xDate, str):
-            isOk = len( xDate )>=8
+            isOk = len(xDate)>=8
             if isOk:
                 try:
-                    v = int( xDate )
+                    v = int(xDate)
                 except ValueError:
                     v = 0
-            return self.from_xdate( v )
+            return self.from_xdate(v)
         assert isinstance(xDate, int)
-        isOk = xDate>=self.firstValidDate
+        isOk = xDate >= self.firstValidDate
         year = int(xDate / (10**4))
         month = int((xDate-year * 10**4) / 100)
         day = xDate % 100
@@ -145,8 +145,8 @@ class CalDate(AnyDate):
         # Returns triplet of (year,month,day)
         tup = None
         if isinstance(shortDate, str):
-            if shortDate.find( '-' )==4:
-                tup = self.from_xdate( shortDate.replace( "-", "" ) )
+            if shortDate.find('-') == 4:
+                tup = self.from_xdate(shortDate.replace( "-", "" ))
         if not tup:
             tup = self.from_xdate( 0 )
         self.errorCode = not tup[ 0 ]
@@ -155,7 +155,7 @@ class CalDate(AnyDate):
 
     def check_ymd(self, year, month, day):
         try:
-            dt = datetime.date( year, month, day )
+            dt = datetime.date(year, month, day)
         except ValueError:
             dt = None
         return dt is not None
@@ -167,7 +167,7 @@ class CalDate(AnyDate):
         year = int( self.xdate / (10**4) )
         month = int( (self.xdate-year * 10**4) / 100 )
         day = self.xdate % 100
-        return self.to_string( year, month, day, isoFormat )
+        return self.to_string(year, month, day, isoFormat)
 
 
 #
@@ -186,9 +186,9 @@ class ShortDate(AnyDate):
             # Date of format 'YYYY-MM-DD' (see date +%F)
             assert isinstance(m, int)
             isOk = True
-            if y.find( "/" )>0:
-                spl = y.split( "/" )
-                isOk = len( spl )>=2
+            if y.find("/") > 0:
+                spl = y.split("/")
+                isOk = len(spl) >= 2
                 if isOk:
                     if isDayMonth:
                         day = spl[ 0 ]
@@ -196,18 +196,18 @@ class ShortDate(AnyDate):
                     else:
                         day = spl[ 1 ]
                         month = spl[ 0 ]
-                    self.year = 0 if len( spl )<=2 else int( spl[ 2 ] )
+                    self.year = 0 if len( spl ) <= 2 else int(spl[ 2 ])
                     self.month = month
                     self.day = day
-            isOk = len( y )>=10
+            isOk = len(y) >= 10
             if isOk:
-                self.errorCode = int(not self.from_date( y ))
+                self.errorCode = int(not self.from_date(y))
         elif isinstance(y, int):
             isOk = self.valid_date()
             self.errorCode = int(not isOk)
         else:
             assert isinstance(y, tuple)
-            self.from_date( y )
+            self.from_date(y)
 
 
     def __str__(self):
@@ -219,7 +219,7 @@ class ShortDate(AnyDate):
         Checks whether date within is valid.
         :return: True iff date is valid.
         """
-        return aDateMaster.valid_date( self.year, self.month, self.day )
+        return aDateMaster.valid_date(self.year, self.month, self.day)
 
 
     def set_no_date(self):
@@ -230,7 +230,7 @@ class ShortDate(AnyDate):
 
     def from_caldate(self, calDate):
         year = int( calDate.xdate / (10**4) )
-        month = int( (calDate.xdate-year * 10**4) / 100 )
+        month = int((calDate.xdate-year * 10**4) / 100)
         day = calDate.xdate % 100
         self.year = year
         self.month = month
@@ -240,7 +240,7 @@ class ShortDate(AnyDate):
 
     def from_date(self, aStr):
         self.set_no_date()
-        if isinstance(aStr, (list, tuple)) and len(aStr)>=3:
+        if isinstance(aStr, (list, tuple)) and len(aStr) >= 3:
             y = aStr[ 0 ]
             m = aStr[ 1 ]
             d = aStr[ 2 ]
@@ -252,11 +252,11 @@ class ShortDate(AnyDate):
             return self.valid_date()
         assert isinstance(aStr, str)
         cal = CalDate()
-        tuples = cal.from_xdate( aStr.replace( "-", "" ) )
+        tuples = cal.from_xdate(aStr.replace( "-", "" ))
         isOk = tuples[ 0 ]
         assert isinstance(isOk, bool)
         if isOk:
-            return self.from_date( [tuples[ 1 ][ 0 ], tuples[ 1 ][ 1 ], tuples[ 1 ][ 2 ]] )
+            return self.from_date([tuples[ 1 ][ 0 ], tuples[ 1 ][ 1 ], tuples[ 1 ][ 2 ]])
         return False
 
 
@@ -266,10 +266,10 @@ class ShortDate(AnyDate):
         :return: the Unix timestamp of this date
         """
         try:
-            ts = int(datetime.datetime( self.year, self.month, self.day ).timestamp())
+            ts = int(datetime.datetime(self.year, self.month, self.day).timestamp())
         except ValueError:
             ts = 0
-        if ts<315576000 or ts>6342926400:
+        if ts < 315576000 or ts > 6342926400:
             return 0
         return ts
 
@@ -281,10 +281,10 @@ class ShortDate(AnyDate):
         :return: True, if entered timestamp is a reasonable date
         """
         self.set_no_date()
-        isOk = ts>=315576000        # "1980-01-01 12:00"
-        isOk = isOk and ts<=6342926400      # "2170-12-31 12:00"
+        isOk = ts >= 315576000        # "1980-01-01 12:00"
+        isOk = isOk and ts <= 6342926400      # "2170-12-31 12:00"
         if isOk:
-            dttm = datetime.datetime.utcfromtimestamp( ts )
+            dttm = datetime.datetime.utcfromtimestamp(ts)
             self.year = dttm.year
             self.month = dttm.month
             self.day = dttm.day
@@ -292,7 +292,7 @@ class ShortDate(AnyDate):
 
 
     def day_of_month(self):
-        return aDateMaster.day_of_month( self )
+        return aDateMaster.day_of_month(self)
 
 
     def from_MJD(self, mjd):
@@ -333,11 +333,11 @@ class ShortDate(AnyDate):
 
 
     def match(self, sd):
-        return self.year==sd.year and self.month==sd.month and self.day==sd.day
+        return self.year == sd.year and self.month == sd.month and self.day == sd.day
 
 
     def to_str(self, isoFormat="E8601DAw"):
-        return self.to_string( self.year, self.month, self.day, isoFormat )
+        return self.to_string(self.year, self.month, self.day, isoFormat)
 
 
 #
@@ -361,11 +361,11 @@ class DateMaster:
                     6:["Sun", "Su", "Sunday"],
                     7:["???", "-", "--"]}
         self.monthAbbreviationUp = None
-        self.hash_weekdays( weekDays )
+        self.hash_weekdays(weekDays)
         self.set_month_abbreviation()
         self.hash_month_names()
         self.mjd = 0
-        assert len( self.monthDuration )-1==12
+        assert len(self.monthDuration)-1 == 12
 
 
     def set_month_abbreviation(self, strings=None):
@@ -376,14 +376,14 @@ class DateMaster:
         if strings is None:
             self.monthAbbreviation = abbr
         else:
-            aList = strings.split( ";" )
+            aList = strings.split(";")
             assert len( aList )==12+1
-            self.monthAbbreviation = tuple( aList )
+            self.monthAbbreviation = tuple(aList)
         return self.upper_abbrev()
 
 
     def upper_abbrev(self):
-        assert len( self.monthAbbreviation )==12+1
+        assert len(self.monthAbbreviation) == 12+1
         res = []
         for m in self.monthAbbreviation:
             res.append(m.upper())
@@ -423,7 +423,7 @@ class DateMaster:
 
     def hash_weekdays(self, week_days_list):
         wd = week_days_list
-        assert len( wd )==7+1
+        assert len(wd) == 7+1
         self.weekday = []
         for part in [0, 2]:
             for key, item in wd.items():
@@ -472,13 +472,13 @@ class DateMaster:
             year = shortDate.year
             month = shortDate.month
             day = shortDate.day
-        if month<1 or month>12 or day<1:
+        if month < 1 or month > 12 or day < 1:
             return -1
         # Returns 1 if it is the first day, 0 if it is the last
         if day==1:
             return 1
         nDays = self.days_of_month( month, year )
-        if day==nDays:
+        if day == nDays:
             return 0
         if day > nDays:
             return -1
@@ -501,14 +501,14 @@ class DateMaster:
 
 
     def is_leap_year(self, year):
-        if year==0:
+        if year == 0:
             return False
-        assert year>=100
+        assert year >= 100
         if year % 4:
             return False
         if year % 100:
             return True
-        return (year % 400)==0
+        return (year % 400) == 0
 
 
     def valid_date(self, year, month, day):
@@ -516,7 +516,7 @@ class DateMaster:
         assert isinstance(month, int)
         assert isinstance(day, int)
         try:
-            aDate = datetime.datetime( year, month, day )
+            aDate = datetime.datetime(year, month, day)
         except ValueError:
             return False
         assert aDate is not None

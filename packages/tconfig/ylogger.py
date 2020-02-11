@@ -12,6 +12,16 @@ import yadate
 
 
 #
+# run_test()
+#
+def run_test(param):
+    for a in param:
+        aLog = GenLog(a)
+        aLog.dump()
+    return 0
+
+
+#
 # CLASS GenLog
 #
 class GenLog():
@@ -24,7 +34,7 @@ class GenLog():
         if sFile is None:
             self.stream = None
         else:
-            self.stream = self._try_text( sFile )
+            self.stream = self._try_text(sFile)
         if aDate is None:
             s = "-"
         else:
@@ -34,12 +44,12 @@ class GenLog():
         self.logDate = s
 
 
-    def to_list (self):
+    def to_list(self):
         res = self.stream.read().split("\n")
         return res
 
 
-    def add_lines (self):
+    def add_lines(self):
         if self.stream is not None:
             textList = self.to_list()
             self.lines += textList
@@ -54,18 +64,18 @@ class GenLog():
                 s = a.rstrip()
                 if s.endswith("[INFO] BUILD SUCCESS"):
                     idxOk = idx
-            if idxOk>0:
+            if idxOk > 0:
                 idx = idxOk
-                while idx<idxOk+5:
+                while idx < idxOk+5:
                     a = textList[idx]
                     spl = a.split("[INFO] Finished at:")
-                    if len(spl)>1:
+                    if len(spl) > 1:
                         sMsgAt = spl[-1].strip()
                         break
                     idx += 1
-            if idxOk>0:
-                if sMsgAt.count("T")==1:
-                    s = " ".join( sMsgAt.split("T") )
+            if idxOk > 0:
+                if sMsgAt.count("T") == 1:
+                    s = " ".join(sMsgAt.split("T"))
                     when = s[:-1] if s.endswith("Z") else s
                 else:
                     when = sMsgAt
@@ -76,15 +86,15 @@ class GenLog():
         return True
 
 
-    def dump (self, outFile=stdout):
+    def dump(self, outFile=stdout):
         for a in self.lines:
             outFile.write(a)
             outFile.write("\n")
         return True
 
 
-    def _try_text (self, sFile):
-        isFile = os.path.isfile( sFile )
+    def _try_text(self, sFile):
+        isFile = os.path.isfile(sFile)
         f = None
         try:
             if isFile:
@@ -92,16 +102,6 @@ class GenLog():
         except FileNotFoundError:
             pass
         return f
-
-
-#
-# run_test()
-#
-def run_test (param):
-    for a in param:
-        aLog = GenLog( a )
-        aLog.dump()
-    return 0
 
 
 #
@@ -113,5 +113,5 @@ if __name__ == "__main__":
     if PARAM:
         CODE = run_test(PARAM)
     else:
-        CODE = run_test( [ sys.argv[0] ] )
+        CODE = run_test([sys.argv[0]])
     sys.exit(CODE)

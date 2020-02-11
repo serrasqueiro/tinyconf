@@ -91,9 +91,9 @@ def test_adate(args):
                   "is:", sd, "Error:", sd.errorCode,
                   "Test-OK?", isOk)
         y = CalDate(20200229)
-        niceOk, (a,b,c) = y.from_xdate( "2018-10-08" )
+        niceOk, (a,b,c) = y.from_xdate("2018-10-08")
         assert not niceOk
-        assert a==0 and b==0 and c==0
+        assert a == 0 and b == 0 and c == 0
     assert isOk
     if len(args) > 0:
         idx = 10
@@ -128,7 +128,7 @@ def test_adate(args):
             sUp = aDateMaster.monthAbbreviationUp[m]
             y = aDateMaster.month_name(sUp)
             print("#{}={}, name: {}".format(m, y, sUp))
-            assert m==y
+            assert m == y
     return True
 
 

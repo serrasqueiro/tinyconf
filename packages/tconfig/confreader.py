@@ -12,13 +12,13 @@ from copy import deepcopy
 #
 # run_confreader()
 #
-def run_confreader (outFile, errFile, args):
+def run_confreader(outFile, errFile, args):
     if args==[]:
         return basic_test_confreader(outFile, errFile, ["a"])
     code = basic_test_confreader(outFile, errFile, args)
     return code
 
-def basic_test_confreader (outFile, errFile, inArgs):
+def basic_test_confreader(outFile, errFile, inArgs):
     cmd = inArgs[0]
     if cmd=="a":
         bConfig.set_home()
@@ -27,7 +27,7 @@ def basic_test_confreader (outFile, errFile, inArgs):
         cfg = bConfig.conf[ "tec" ]
         there, _ = sorted_dict( cfg )
         for key, item in there:
-            print("key={}, item={}\n---\n".format( key, item if item else "-" ))
+            print("key={}, item={}\n---\n".format(key, item if item else "-"))
         assert isOk
         return 0
     return None
@@ -40,7 +40,7 @@ class ConfHome():
     """
     Home Configuration class
     """
-    def _init_conf_home (self, autoConf=False):
+    def _init_conf_home(self, autoConf=False):
         self.lastPath = None
         self.homeDir = None
         self.homeDirRewrite = "allow"
@@ -51,11 +51,11 @@ class ConfHome():
             self._set_config()
 
 
-    def _set_config (self):
+    def _set_config(self):
         self.set_home()
 
 
-    def set_home (self, newHome=None):
+    def set_home(self, newHome=None):
         if newHome is not None:
             self.homeDir = newHome
             self.vars["HOME"] = newHome
@@ -81,7 +81,7 @@ class ConfReader(ConfHome):
     """
     Configuration Reader class
     """
-    def __init__ (self, autoConf=False):
+    def __init__(self, autoConf=False):
         self._init_conf_home( autoConf )
         self.conf = dict()
         self.paths = dict()
@@ -89,11 +89,11 @@ class ConfReader(ConfHome):
         self.varTuples = []
 
 
-    def config_vars (self):
+    def config_vars(self):
         return self.varTuples
 
 
-    def add_var (self, left, right, checkExists=False):
+    def add_var(self, left, right, checkExists=False):
         assert isinstance(checkExists, bool)
         if checkExists:
             isThere = left in self.vars
@@ -117,7 +117,7 @@ class ConfReader(ConfHome):
         return True
 
 
-    def reader (self, name, nick=None, autoHome=True):
+    def reader(self, name, nick=None, autoHome=True):
         if nick is None:
             nick = name
         p = os.path.join( self.homeDir, name ) if autoHome else name
@@ -130,7 +130,7 @@ class ConfReader(ConfHome):
         return isOk
 
 
-    def text_reader (self, nick, data):
+    def text_reader(self, nick, data):
         assert isinstance(nick, str)
         if isinstance(data, str):
             isOk, content = self._parse_input( data )
@@ -141,7 +141,7 @@ class ConfReader(ConfHome):
         return isOk
 
 
-    def update (self, nick=None, doAll=True, debug=0):
+    def update(self, nick=None, doAll=True, debug=0):
         isOk = True
         if nick is None:
             if doAll:
@@ -151,14 +151,14 @@ class ConfReader(ConfHome):
                     assert isOk
             return isOk
         msg = self._update_vars( self.conf[nick]["assignment"] )
-        if debug>0:
+        if debug > 0:
             print("Debug: update():", msg)
-        assert msg==""
-        self.varTuples = self._tuples_from_vars( self.vars )
+        assert msg == ""
+        self.varTuples = self._tuples_from_vars(self.vars)
         return isOk
 
 
-    def _parse_input (self, data):
+    def _parse_input(self, data):
         if isinstance(data, str):
             inLines = data.split("\n")
         elif isinstance(data, list):
@@ -174,12 +174,12 @@ class ConfReader(ConfHome):
             nrLine += 1
             assert isinstance(a, str)
             rightStrip = a.rstrip("\t ")
-            if a!=rightStrip:
+            if a != rightStrip:
                 warnList.append( "line {}: blanks or tabs on the right".format( nrLine ) )
             s = a.strip()
-            if s=="":
+            if s == "":
                 continue
-            if s[0]=="#":
+            if s[0] == "#":
                 continue
             row = (nrLine, s)
             payload.append( row )
@@ -197,7 +197,7 @@ class ConfReader(ConfHome):
         return True, content
 
 
-    def _read_assign (self, s, assignList, listMsgs=None):
+    def _read_assign(self, s, assignList, listMsgs=None):
         msgs = listMsgs if listMsgs is not None else []
         plus = False
         aDict = assignList[0]
@@ -226,7 +226,7 @@ class ConfReader(ConfHome):
         return left
 
 
-    def _update_vars (self, assignList):
+    def _update_vars(self, assignList):
         """
         Parameters
         ----------
@@ -266,7 +266,7 @@ class ConfReader(ConfHome):
         return ""
 
 
-    def _update_var (self, left, eq, right, aCache=None, debug=0):
+    def _update_var(self, left, eq, right, aCache=None, debug=0):
         leftList = "list:"+left
         if aCache is None:
             cache = self._cache_vars()
@@ -277,19 +277,19 @@ class ConfReader(ConfHome):
             if s.find("\\")>=0:
                 return False
         if eq=="=":
-            if debug>0:
+            if debug > 0:
                 print("Debug: assign L=R: {}={}".format( left, s ))
             self.vars[ left ] = s
             self.vars[ leftList ] = [ s ]
             self.varList[ left ] = [ s ]
-        elif eq=="+=":
+        elif eq == "+=":
             there = self.vars[ left ]
             there += self.sepMultipleValue
             there += s
             self.vars[ left ] = there
             self.vars[ leftList ].append( s )
             self.varList[ left ].append( s )
-            if debug>0:
+            if debug > 0:
                 print("Debug: assign L+=R: {}={};\n\tvars:{}\n\tvarList:{}\n".
                       format( left, s, self.vars[left], self.varList[left] ))
         else:
@@ -297,34 +297,34 @@ class ConfReader(ConfHome):
         return True
 
 
-    def _cache_vars (self):
+    def _cache_vars(self):
         assert self.homeDir[-1]!="/"
         cache = {"$HOME/": self.homeDir+"/",
                  }
         return cache
 
 
-    def _tuples_from_vars (self, aVars, debug=0):
+    def _tuples_from_vars(self, aVars, debug=0):
         aList = []
         _, ks = sorted_dict( aVars )
         for aVar in ks:
             value = aVars[ aVar ]
             if aVar.find(":")!=-1:
                 continue
-            if debug>0:
+            if debug > 0:
                 print("Debug: var {}={}".format( aVar, value ))
             aList.append( (aVar, value) )
         return aList
 
 
-    def _subst_var (self, s, cache):
+    def _subst_var(self, s, cache):
         r = s
         for k, val in cache.items():  # k='$HOME', ...etc.
             keep = None
-            while r!=keep:
+            while r != keep:
                 keep = r
-                pos = r.find( k )
-                if pos>=0:
+                pos = r.find(k)
+                if pos >= 0:
                     r = r.replace(k, val)
         return r
 
@@ -332,19 +332,19 @@ class ConfReader(ConfHome):
 #
 # sorted_dict()
 #
-def sorted_dict (aDict):
+def sorted_dict(aDict):
     ks = []
     res = []
     if isinstance(aDict, dict):
-        ks = list( aDict.keys() )
+        ks = list(aDict.keys())
         ks.sort()
         for a in ks:
             res.append( (a, aDict[ a ]) )
     elif isinstance(aDict, list):
-        myList = deepcopy( aDict )
+        myList = deepcopy(aDict)
         myList.sort()
         for a in myList:
-            res.append( a )
+            res.append(a)
         ks = None
     else:
         assert False
@@ -354,7 +354,7 @@ def sorted_dict (aDict):
 #
 # valid_var()
 #
-def valid_var (s, others=("/", "_")):
+def valid_var(s, others=("/", "_")):
     isOk = s[0].isalpha()
     if not isOk:
         return False
@@ -369,13 +369,13 @@ def valid_var (s, others=("/", "_")):
 #
 # valid_rside()
 #
-def valid_rside (s, invalids=None):
+def valid_rside(s, invalids=None):
     if invalids is None:
         invalids = ("\t", "  ",)
     else:
         assert isinstance(invalids, tuple)
     for a in invalids:
-        if s.find( a )>=0:
+        if s.find( a ) >= 0:
             return False
     return True
 

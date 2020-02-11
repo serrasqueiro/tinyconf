@@ -41,7 +41,7 @@ backup_files+=my.tar
         x, _ = sorted_dict( confSet )
         for a in x:
             left, right = a
-            if left=="assignment":
+            if left == "assignment":
                 _, rest = right[0], right[1:]
                 for q in rest:
                     print("assignment:", q)
@@ -54,7 +54,7 @@ backup_files+=my.tar
                   bConfig.varList.items()):
         idx += 1
         for var, value in items:
-            if var.find(":")==-1:
+            if var.find(":") == -1:
                 print("var{}: '{}' is: {}".format( "" if idx<=1 else "List", var, value ))
     return 0
 

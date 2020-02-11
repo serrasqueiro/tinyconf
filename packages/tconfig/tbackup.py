@@ -17,7 +17,7 @@ import archs.packs as ap
 #
 # run_backup()
 #
-def run_backup (outFile, errFile, inArgs):
+def run_backup(outFile, errFile, inArgs):
     verbose = 0
     debug = 0
     nick = "tec"
@@ -44,7 +44,7 @@ def run_backup (outFile, errFile, inArgs):
             del param[0]
             continue
         return None
-    assert verbose<=3
+    assert verbose <= 3
     # Option adjustments
     opts["verbose"] = verbose
 
@@ -56,7 +56,7 @@ def run_backup (outFile, errFile, inArgs):
     if cmd=="config":
         aConf = bConfig
         allParams = param==[]
-        if debug>0:
+        if debug > 0:
             print("Nick:", nick, "; at:", aConf.paths[nick])
         if allParams:
             print("Config: {}\nvars:".format( aConf.lastPath ))
@@ -67,13 +67,13 @@ def run_backup (outFile, errFile, inArgs):
         if allParams:
             print("--")
             aList, _ = sorted_dict( aConf.vars )
-            if verbose>0:
+            if verbose > 0:
                 for aVar, s in aList:
-                    print("var\t{}: {}".format( aVar, s ))
-                aList, _ = sorted_dict( aConf.varList )
+                    print("var\t{}: {}".format(aVar, s))
+                aList, _ = sorted_dict(aConf.varList)
                 print("--")
                 for aVar, s in aList:
-                    print("varList\t{}: {}".format( aVar, s ))
+                    print("varList\t{}: {}".format(aVar, s))
         isOk = "zip_bkp" in aConf.vars
         if not isOk:
             errFile.write("Missing zip_bkp var!\n")
@@ -87,14 +87,14 @@ def run_backup (outFile, errFile, inArgs):
     # sanity check
     if "zip_bkp" not in bConfig.vars:
         s = "tec.zip"
-        errFile.write("zip_bkp missing, assuming '{}'\n".format( s ))
+        errFile.write("zip_bkp missing, assuming '{}'\n".format(s))
         bConfig.add_var("zip_bkp", s)
 
     # Run...!
     code = processor(outFile, errFile, cmd, param, opts)
     if code is None:
         return None
-    if verbose>0:
+    if verbose > 0:
         print("processor() returned: {}".format( code ))
     return code
 
@@ -102,7 +102,7 @@ def run_backup (outFile, errFile, inArgs):
 #
 # processor()
 #
-def processor (outFile, errFile, cmd, param, opts, debug=0):
+def processor(outFile, errFile, cmd, param, opts, debug=0):
     code = 0
     #verbose = opts["verbose"]
     aConf = opts["config"]
@@ -146,7 +146,7 @@ def processor (outFile, errFile, cmd, param, opts, debug=0):
 #
 # update_zip()
 #
-def update_zip (outFile, zipName, direx, lists, opts=None, debug=0):
+def update_zip(outFile, zipName, direx, lists, opts=None, debug=0):
     debug = 0
     code = 0
     assert lists is None or isinstance(lists, dict)
@@ -196,7 +196,7 @@ def update_zip (outFile, zipName, direx, lists, opts=None, debug=0):
 #
 # zip_result_str()
 #
-def zip_result_str (aList):
+def zip_result_str(aList):
     if isinstance(aList, (list, tuple)):
         isOk = len(aList)>0 and aList[-1]==""
         if isOk:
@@ -212,11 +212,11 @@ def zip_result_str (aList):
 #
 # listing()
 #
-def listing (outFile, errFile, cmd, direx, pnames, opts, debug=0):
+def listing(outFile, errFile, cmd, direx, pnames, opts, debug=0):
     assert errFile is not None
     lists = dict()
     verbose = opts["verbose"]
-    assert len(direx)==3
+    assert len(direx) == 3
     homeDir, originDir, tecDir = direx
 
     if cmd in ("check",
@@ -309,7 +309,7 @@ def listing (outFile, errFile, cmd, direx, pnames, opts, debug=0):
                     print("Checking {} ...{}".format( myPath, "" if isThere else "(not there)" ))
                 if isThere:
                     inp = ap.ATextFile( myPath )
-                    bogus = inp.text_read()==""
+                    bogus = inp.text_read() == ""
                     assert not bogus
                     thereCRC = inp.calc_mini_crc()
                 else:
@@ -317,25 +317,25 @@ def listing (outFile, errFile, cmd, direx, pnames, opts, debug=0):
                 textualHint, _ = pack.lastCRC
                 isOk = miniCRC==thereCRC
                 sTic = " "*2
-                sNotOk = "NotOk" + ("" if textualHint=="txt" else "(b)")
-                if verbose>0:
+                sNotOk = "NotOk" + ("" if textualHint == "txt" else "(b)")
+                if verbose > 0:
                     print(".." if isThere else ".!",
-                          "OK" if isOk else sNotOk, "{:.>5} {}{}".format( miniCRC, sTic, pName ))
+                          "OK" if isOk else sNotOk, "{:.>5} {}{}".format(miniCRC, sTic, pName))
                 else:
                     print(".." if isThere else ".!",
-                          "OK" if isOk else sNotOk, "{}{}".format( sTic, pName ))
+                          "OK" if isOk else sNotOk, "{}{}".format(sTic, pName))
                 if isOk:
                     countOk += 1
                 else:
                     countFail += 1
-            if verbose>0 and countFail<=0:
-                print("Compared {} file(s), all ok.".format( countOk ))
+            if verbose > 0 and countFail <= 0:
+                print("Compared {} file(s), all ok.".format(countOk))
         elif cmd=="latest":  # compare
             msg = "ok"
-            pack = ap.FilePack( p, aStat )
+            pack = ap.FilePack(p, aStat)
             for row in pack.orderedList:
                 print(row)
-        if msg!="ok":
+        if msg != "ok":
             return None
         lists[ q ].append( ("zip", tList) )
     if countFail:
@@ -346,11 +346,11 @@ def listing (outFile, errFile, cmd, direx, pnames, opts, debug=0):
 #
 # conv_ziplist()
 #
-def conv_ziplist (textRows):
+def conv_ziplist(textRows):
     res = []
     for a in textRows:
-        uStr = commands.cut_excess( a ).strip().split(" ")
-        isOk = uStr[ -2 ].find(":")>=0+2
+        uStr = commands.cut_excess(a).strip().split(" ")
+        isOk = uStr[ -2 ].find(":") >= 0+2
         if not isOk:
             print("Uops:", uStr)
         assert isOk
@@ -364,7 +364,7 @@ def conv_ziplist (textRows):
 #
 if __name__ == "__main__":
     import sys
-    CODE = run_backup(sys.stdout, sys.stderr, sys.argv[ 1: ])
+    CODE = run_backup(sys.stdout, sys.stderr, sys.argv[1:])
     if CODE is None:
         print("""updater.py COMMAND [options] [file ...]
 Commands are:
@@ -381,4 +381,4 @@ Commands are:
 """)
         CODE = 0
     assert isinstance(CODE, int)
-    sys.exit( CODE )
+    sys.exit(CODE)

@@ -1,5 +1,5 @@
 """
-Yet another ordered directionary!
+Yet another ordered dictionary!
 
 (c)2020  Henrique Moreira (part of 'tconfig')
 """
@@ -14,7 +14,7 @@ class DGeneric():
     """
     DGeneric, a generic dictionary abstract class
     """
-    def init_dgeneric (self, aDesc):
+    def init_dgeneric(self, aDesc):
         assert isinstance(aDesc, str)
 
 
@@ -26,15 +26,15 @@ class DOrder(DGeneric):
     Dictionary Order, simplified class
     """
     def __init__(self, data=None, aDesc=""):
-        self.init_dgeneric( aDesc )
+        self.init_dgeneric(aDesc)
         self.desc = aDesc
-        self.data, self.keying = self._set_from_dict( data )
+        self.data, self.keying = self._set_from_dict(data)
 
 
     def _set_from_dict(self, data):
         if data is None:
             return dict(), []
-        keys = list( data.keys() )
+        keys = list(data.keys())
         keys.sort()
         return data, keys
 
@@ -46,6 +46,9 @@ class DOrder(DGeneric):
         """
         return self.keying
 
+
+#
+# CLASS
 
 #
 # Main script
