@@ -8,7 +8,7 @@
 
 from adate import aDateMaster, CalDate, ShortDate
 
-# pylint: disable=missing-function-docstring, too-many-locals, chained-comparison
+# pylint: disable=missing-function-docstring, invalid-name
 
 
 #
@@ -21,6 +21,19 @@ def test_adate(args):
     """
     testLeapYears = False
     testModifiedJulianDay = True
+    isOk = run_tests_adate(args, testLeapYears, testModifiedJulianDay)
+    assert isOk
+    return isOk
+
+
+def run_tests_adate(args, testLeapYears, testModifiedJulianDay):
+    """
+    Run the relevant tests.
+    :param args: System arguments
+    :param testLeapYears: do test of leap years
+    :param testModifiedJulianDay: do test of MJD (Modified Julian Day)
+    :return: True
+    """
     isOk = False
     for x in ["good", "bad"]:
         if x == "good":
@@ -91,44 +104,54 @@ def test_adate(args):
                   "is:", sd, "Error:", sd.errorCode,
                   "Test-OK?", isOk)
         y = CalDate(20200229)
-        niceOk, (a,b,c) = y.from_xdate("2018-10-08")
+        niceOk, (a, b, c) = y.from_xdate("2018-10-08")
         assert not niceOk
         assert a == 0 and b == 0 and c == 0
     assert isOk
-    if len(args) > 0:
-        idx = 10
-        y = int(args[0])
-        if y >= 9999:
-            sd = ShortDate()
-            sd.from_timestamp(y)
-            print("ShortDate() from timestamp_ :", y, "sd:", sd)
-            z = sd.timestamp()
-            print("Timestamp from date at 0:00 :", z)
-            assert z-y < 86400
-            idx = -1
-        while idx > 0:
-            idx -= 1
-            ymd = aDateMaster.calc_easter(y)
-            #print("Easter:", ymd)
-            sd = ShortDate(ymd)
-            calcMJD = sd.nys_date_to_MJD(ymd[0], ymd[1], ymd[2])
-            wd = aDateMaster.week_day(ymd)
-            print("Easter:", sd, "MJD:", calcMJD%7, wd, "Sunday" if wd == 6 else "?", calcMJD)
-            isOk = wd == 6
-            assert isOk
-            y += 1
+    if args != []:
+        isOk = test_with_args(args)
     else:
-        sd = ShortDate(2020, 2, 29)
-        s = str(sd)
-        wd = aDateMaster.week_day(sd)
-        print("ShortDate(2020, 2, 29): {}, timestamp()={}, lang_week_day({})='{}'".
-              format(s, sd.timestamp(), wd, aDateMaster.lang_week_day(wd)))
-        assert s=="2020-02-29"
-        for m in range(1, 12+1, 1):
-            sUp = aDateMaster.monthAbbreviationUp[m]
-            y = aDateMaster.month_name(sUp)
-            print("#{}={}, name: {}".format(m, y, sUp))
-            assert m == y
+        isOk = remaining_tests()
+    return isOk
+
+
+def test_with_args(args):
+    idx = 10
+    y = int(args[0])
+    if y >= 9999:
+        sd = ShortDate()
+        sd.from_timestamp(y)
+        print("ShortDate() from timestamp_ :", y, "sd:", sd)
+        z = sd.timestamp()
+        print("Timestamp from date at 0:00 :", z)
+        assert z-y < 86400
+        idx = -1
+    while idx > 0:
+        idx -= 1
+        ymd = aDateMaster.calc_easter(y)
+        #print("Easter:", ymd)
+        sd = ShortDate(ymd)
+        calcMJD = sd.nys_date_to_MJD(ymd[0], ymd[1], ymd[2])
+        wd = aDateMaster.week_day(ymd)
+        print("Easter:", sd, "MJD:", calcMJD%7, wd, "Sunday" if wd == 6 else "?", calcMJD)
+        isOk = wd == 6
+        assert isOk
+        y += 1
+    return True
+
+
+def remaining_tests():
+    sd = ShortDate(2020, 2, 29)
+    s = str(sd)
+    wd = aDateMaster.week_day(sd)
+    print("ShortDate(2020, 2, 29): {}, timestamp()={}, lang_week_day({})='{}'".
+          format(s, sd.timestamp(), wd, aDateMaster.lang_week_day(wd)))
+    assert s == "2020-02-29"
+    for m in range(1, 12 + 1, 1):
+        sUp = aDateMaster.monthAbbreviationUp[m]
+        y = aDateMaster.month_name(sUp)
+        print("#{}={}, name: {}".format(m, y, sUp))
+        assert m == y
     return True
 
 

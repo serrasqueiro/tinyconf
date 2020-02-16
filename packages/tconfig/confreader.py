@@ -256,10 +256,10 @@ class ConfReader(ConfHome):
                 assert isOk
                 sLefts = []
                 sLefts.append( "${}/".format( left ) )
-                if os.name=="nt":
+                if os.name == "nt":
                     sLefts.append( "${}\\".format( left ) )
                 for sLeft in sLefts:
-                    assert sLeft!=""
+                    assert sLeft != ""
                     lastChr = sLeft[-1]
                     cache[ sLeft ] = right+lastChr
                 assert left
@@ -273,10 +273,10 @@ class ConfReader(ConfHome):
         else:
             cache = aCache
         s = self._subst_var(right, cache)
-        if os.name!="nt":
-            if s.find("\\")>=0:
+        if os.name != "nt":
+            if s.find("\\") >= 0:
                 return False
-        if eq=="=":
+        if eq == "=":
             if debug > 0:
                 print("Debug: assign L=R: {}={}".format( left, s ))
             self.vars[ left ] = s

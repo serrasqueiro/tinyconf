@@ -91,7 +91,7 @@ def split_blanks(s):
         q = 0
         for c in s:
             if c == '"':
-                q = int( q==0 )
+                q = int(q == 0)
             elif c == " ":
                 if q == 0:
                     if buf != "":
@@ -134,11 +134,11 @@ def cut_excess(s, chars=" "):
     for thisByThat in seqs:
         assert len(thisByThat) == 2
         x, y = thisByThat
-        assert x!=y
+        assert x != y
         q = s
         while q:
             s = q.replace(x, y)
-            if s==q:
+            if s == q:
                 return s
             q = s
     return ""

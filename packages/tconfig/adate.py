@@ -196,7 +196,7 @@ class ShortDate(AnyDate):
                     else:
                         day = spl[ 1 ]
                         month = spl[ 0 ]
-                    self.year = 0 if len( spl ) <= 2 else int(spl[ 2 ])
+                    self.year = 0 if len(spl) <= 2 else int(spl[ 2 ])
                     self.month = month
                     self.day = day
             isOk = len(y) >= 10
@@ -377,7 +377,7 @@ class DateMaster:
             self.monthAbbreviation = abbr
         else:
             aList = strings.split(";")
-            assert len( aList )==12+1
+            assert len( aList ) == 12+1
             self.monthAbbreviation = tuple(aList)
         return self.upper_abbrev()
 
@@ -493,7 +493,7 @@ class DateMaster:
         :return: the number of days for that month
         """
         nDays = 0
-        if month>=1 and month<=12:
+        if month >= 1 and month <= 12:
             nDays = self.monthDuration[ month ]
             if month==2:
                 nDays = 28 + int( self.is_leap_year( year ) )

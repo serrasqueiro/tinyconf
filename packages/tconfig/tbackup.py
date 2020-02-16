@@ -5,7 +5,7 @@ Module for handling short backups.
 """
 
 # pylint: disable=invalid-name, missing-function-docstring, too-many-locals, too-many-branches,
-# pylint: disable=unused-wildcard-import, chained-comparison
+# pylint: disable=bad-whitespace, chained-comparison
 
 import os
 import commands
@@ -350,11 +350,11 @@ def conv_ziplist(textRows):
     res = []
     for a in textRows:
         uStr = commands.cut_excess(a).strip().split(" ")
-        isOk = uStr[ -2 ].find(":") >= 0+2
+        isOk = uStr[-2].find(":") >= 0+2
         if not isOk:
             print("Uops:", uStr)
         assert isOk
-        size = int(uStr[ 0 ])
+        size = int(uStr[0])
         res.append((uStr[-1], size))
     return res
 

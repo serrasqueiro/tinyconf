@@ -7,7 +7,7 @@ Yet another Date module!
 import copy
 import datetime
 
-# pylint: disable=invalid-name, pointless-string-statement, missing-function-docstring, no-self-use
+# pylint: disable=bad-whitespace, invalid-name, pointless-string-statement, missing-function-docstring, no-self-use
 
 
 #
