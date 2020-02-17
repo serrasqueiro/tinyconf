@@ -122,7 +122,7 @@ class CalDate(AnyDate):
         #   where:  [1]  ISO 8601 Basic and Extended Notations
         #
         if isinstance(xDate, str):
-            isOk = len(xDate)>=8
+            isOk = len(xDate) >= 8
             if isOk:
                 try:
                     v = int(xDate)
@@ -162,7 +162,7 @@ class CalDate(AnyDate):
 
 
     def to_str(self, isoFormat="E8601DAw"):
-        if self.xdate<=0:
+        if self.xdate <= 0:
             return "-"
         year = int( self.xdate / (10**4) )
         month = int( (self.xdate-year * 10**4) / 100 )
@@ -427,7 +427,7 @@ class DateMaster:
         self.weekday = []
         for part in [0, 2]:
             for key, item in wd.items():
-                if key>=7:
+                if key >= 7:
                     break
                 self.weekday.append( item[ part ] )
         return True
@@ -475,7 +475,7 @@ class DateMaster:
         if month < 1 or month > 12 or day < 1:
             return -1
         # Returns 1 if it is the first day, 0 if it is the last
-        if day==1:
+        if day == 1:
             return 1
         nDays = self.days_of_month( month, year )
         if day == nDays:
@@ -495,7 +495,7 @@ class DateMaster:
         nDays = 0
         if month >= 1 and month <= 12:
             nDays = self.monthDuration[ month ]
-            if month==2:
+            if month == 2:
                 nDays = 28 + int( self.is_leap_year( year ) )
         return nDays
 
