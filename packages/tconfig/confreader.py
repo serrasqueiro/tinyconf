@@ -7,20 +7,20 @@ Module for reading configuration files.
 import os
 from copy import deepcopy
 
-# pylint: disable=missing-function-docstring, invalid-name, no-self-use, attribute-defined-outside-init
+# pylint: disable=missing-function-docstring, unused-argument, invalid-name, no-self-use, attribute-defined-outside-init
 
 #
 # run_confreader()
 #
 def run_confreader(outFile, errFile, args):
-    if args==[]:
+    if args == []:
         return basic_test_confreader(outFile, errFile, ["a"])
     code = basic_test_confreader(outFile, errFile, args)
     return code
 
 def basic_test_confreader(outFile, errFile, inArgs):
     cmd = inArgs[0]
-    if cmd=="a":
+    if cmd == "a":
         bConfig.set_home()
         print("bConfig.homeDir:", bConfig.homeDir)
         isOk = bConfig.reader(".tec.conf", "tec")
@@ -44,7 +44,7 @@ class ConfHome():
         self.lastPath = None
         self.homeDir = None
         self.homeDirRewrite = "allow"
-        self.basicEncoding="ISO-8859-1"
+        self.basicEncoding = "ISO-8859-1"
         self.sepMultipleValue = ";"
         self.vars = dict()
         if autoConf:
@@ -100,7 +100,7 @@ class ConfReader(ConfHome):
             if isThere:
                 return False
         if isinstance(right, (list, tuple)):
-            if len(right)<=0:
+            if len(right) <= 0:
                 self._update_var(left, "=", "")
             else:
                 self._update_var(left, "=", right[0])
@@ -202,9 +202,9 @@ class ConfReader(ConfHome):
         plus = False
         aDict = assignList[0]
         pos = s.find("=")
-        if pos<0:
+        if pos < 0:
             return ""
-        assert pos!=0
+        assert pos != 0
         lSide = s[:pos].strip()
         rSide = s[pos+1:].strip()
         if lSide.endswith("+"):
@@ -239,17 +239,17 @@ class ConfReader(ConfHome):
         hdr = self.homeDirRewrite
         for a in assigns:
             left, eq, right = a
-            assert left!="home"
+            assert left != "home"
             newHome = right
-            if left=="HOME":
-                if hdr=="allow":
+            if left == "HOME":
+                if hdr == "allow":
                     self.set_home( newHome )
                 else:
                     assert False
         cache = self._cache_vars()
         for a in assigns:
             left, eq, right = a
-            if left!="HOME":
+            if left != "HOME":
                 isOk = self._update_var( left, eq, right, cache )
                 if not isOk:
                     return "Invalid var: {}".format( right )
@@ -298,7 +298,7 @@ class ConfReader(ConfHome):
 
 
     def _cache_vars(self):
-        assert self.homeDir[-1]!="/"
+        assert self.homeDir[-1] != "/"
         cache = {"$HOME/": self.homeDir+"/",
                  }
         return cache
@@ -309,7 +309,7 @@ class ConfReader(ConfHome):
         _, ks = sorted_dict( aVars )
         for aVar in ks:
             value = aVars[ aVar ]
-            if aVar.find(":")!=-1:
+            if aVar.find(":") != -1:
                 continue
             if debug > 0:
                 print("Debug: var {}={}".format( aVar, value ))

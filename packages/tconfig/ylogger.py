@@ -8,7 +8,7 @@ from sys import stdout
 import os
 import yadate
 
-# pylint: disable=missing-function-docstring, no-self-use
+# pylint: disable=missing-function-docstring, invalid-name, no-self-use
 
 
 #

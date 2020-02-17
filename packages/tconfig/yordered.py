@@ -14,8 +14,8 @@ class DGeneric():
     """
     DGeneric, a generic dictionary abstract class
     """
-    def init_dgeneric(self, aDesc):
-        assert isinstance(aDesc, str)
+    def init_dgeneric(self, a_desc):
+        assert isinstance(a_desc, str)
 
 
 #
@@ -25,9 +25,9 @@ class DOrder(DGeneric):
     """
     Dictionary Order, simplified class
     """
-    def __init__(self, data=None, aDesc=""):
-        self.init_dgeneric(aDesc)
-        self.desc = aDesc
+    def __init__(self, data=None, a_desc=""):
+        self.init_dgeneric(a_desc)
+        self.desc = a_desc
         self.data, self.keying = self._set_from_dict(data)
 
 

@@ -16,7 +16,7 @@ def test_confreader(outFile, errFile, inArgs):
     assert outFile is not None
     assert errFile is not None
     bConfig.set_home()
-    if inArgs==[]:
+    if inArgs == []:
         config = """
 # basic config test
 
@@ -26,9 +26,9 @@ backup_files+=my.tar
 """
         isOk = bConfig.text_reader("tec", config)
     else:
-        assert len(inArgs)==1
+        assert len(inArgs) == 1
         pName = inArgs[0]
-        if pName=="-h":
+        if pName == "-h":
             return None
         isOk = bConfig.reader( pName )
     if not isOk:
@@ -55,7 +55,7 @@ backup_files+=my.tar
         idx += 1
         for var, value in items:
             if var.find(":") == -1:
-                print("var{}: '{}' is: {}".format( "" if idx<=1 else "List", var, value ))
+                print("var{}: '{}' is: {}".format("" if idx <= 1 else "List", var, value))
     return 0
 
 

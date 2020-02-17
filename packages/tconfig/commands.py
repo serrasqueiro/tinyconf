@@ -9,7 +9,7 @@ import sys
 import os
 import subprocess
 
-# pylint: disable=missing-function-docstring, no-self-use
+# pylint: disable=missing-function-docstring, invalid-name
 
 
 #
