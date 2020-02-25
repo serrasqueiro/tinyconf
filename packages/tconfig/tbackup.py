@@ -49,7 +49,7 @@ def run_backup(outFile, errFile, inArgs):
     opts["verbose"] = verbose
 
     # Adjustments
-    if "origin_dir" not in bConfig.vars:
+    if not bConfig.has_var("origin_dir"):
         pass
 
     # Main processing
@@ -63,10 +63,10 @@ def run_backup(outFile, errFile, inArgs):
         for left, right in aConf.config_vars():
             doShow = allParams or left in param
             if doShow:
-                print("\t{}: {}".format( left, right ))
+                print("\t{}: {}".format(left, right))
         if allParams:
             print("--")
-            aList, _ = sorted_dict( aConf.vars )
+            aList, _ = sorted_dict(aConf.all_vars())
             if verbose > 0:
                 for aVar, s in aList:
                     print("var\t{}: {}".format(aVar, s))
@@ -74,18 +74,18 @@ def run_backup(outFile, errFile, inArgs):
                 print("--")
                 for aVar, s in aList:
                     print("varList\t{}: {}".format(aVar, s))
-        isOk = "zip_bkp" in aConf.vars
+        isOk = aConf.has_var("zip_bkp")
         if not isOk:
             errFile.write("Missing zip_bkp var!\n")
             return 4
-        isOk = "tec_dir" in aConf.vars
+        isOk = aConf.has_var("tec_dir")
         if not isOk:
             errFile.write("Missing tec_dir var!\n")
             return 4
         return 0
 
     # sanity check
-    if "zip_bkp" not in bConfig.vars:
+    if bConfig.has_var("zip_bkp"):
         s = "tec.zip"
         errFile.write("zip_bkp missing, assuming '{}'\n".format(s))
         bConfig.add_var("zip_bkp", s)
@@ -108,9 +108,9 @@ def processor(outFile, errFile, cmd, param, opts, debug=0):
     aConf = opts["config"]
     # Build local vars:
     homeDir = aConf.homeDir
-    zipBkp = aConf.vars["zip_bkp"]
-    originDir = aConf.vars["origin_dir"]
-    tecDir = aConf.vars["tec_dir"]
+    zipBkp = aConf.var_value("zip_bkp")
+    originDir = aConf.var_value("origin_dir")
+    tecDir = aConf.var_value("tec_dir")
 
     if cmd in("check",
               "cmp",

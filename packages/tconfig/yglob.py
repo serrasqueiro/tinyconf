@@ -4,7 +4,7 @@ Yet another glob!
 (c)2020  Henrique Moreira (part of 'tconfig')
 """
 
-# pylint: disable=missing-function-docstring, too-few-public-methods, no-self-use
+# pylint: disable=too-few-public-methods
 
 import os
 
@@ -14,36 +14,33 @@ class LPath():
     LPath - Linear path
     """
     def __init__(self, path=""):
-        self._init_path(path)
+        self.w = self._init_path(path)
 
 
     def _init_path(self, path):
         if isinstance(path, str):
-            s = self.linear_path(path)
+            s = linear_path(path)
         elif isinstance(path, (list, tuple)):
             s = ""
             for a in path:
                 if s:
                     s += "/"
-                s += self.linear_path(a)
+                s += linear_path(a)
         else:
             assert False
-        self.w = s
-
-
-    def linear_path(self, path):
-        assert isinstance(path, str)
-        s = path.replace("\\", "/")
         return s
 
 
     def to_os_path(self):
+        """
+        From generic name to the OS-related path
+        :return: string
+        """
         if os.name == "nt":
             s = self.w.replace("/", "\\")
         else:
             s = self.w
-            if s.find("\\") >= 0:
-                return None
+            assert s.find("\\") == -1
         return s
 
 
@@ -78,16 +75,74 @@ class DirList():
 
 
 def tense_list(listing, line_sep, by_line="\n"):
+    """
+    Display 'listing' as a string, each line preceded by 'line_sep', and
+    separated by 'by_line' string.
+    :param listing:
+    :param line_sep:
+    :param by_line:
+    :return: string, the expanded string.
+    """
     s = ""
+    assert isinstance(line_sep, str)
+    assert isinstance(by_line, str)
     for a in listing:
         s += line_sep + a
         s += by_line
     return s
 
 
-#
-# Main script
-#
+
+def gen_pathname(s, os_check=True):
+    """
+    Returns a generic pathname, where A:<path> is converted into /A/<path>
+    :param s:
+    :return: string, the resulting safe string
+    """
+    is_win = os.name == "nt"
+    if not isinstance(s, str):
+        return None
+    if len(s) <= 1:
+        return s
+    drive_letter = s[0].upper()
+    if s[1] == ":" and s[0].isupper():
+        res = "/" + drive_letter
+        s = s[2:]
+    else:
+        res = ""
+    if os_check:
+        assert is_win or (not is_win and s.find("\\") == -1)
+    res += linear_path(s)
+    return res
+
+def linear_path(path):
+    """
+    Linear path is designated as a path without back-slashes, but rather, possibly, slashes.
+    :param self:
+    :param path: string, filename (or a path)
+    :return: string
+    """
+    assert isinstance(path, str)
+    s = path.replace("\\", "/")
+    return s
+
+def which_drive_letter(s):
+    """
+    Returns the associate drive letter, if any
+    :param s: the drive letter reference (Win32)
+    :return: None, or the drive letter (string)
+    """
+    assert isinstance(s, str)
+    if len(s) != 2:
+        return None
+    # e.g. 'C:' is drive
+    letra, colon = s[0], s[1]
+    if colon != ":":
+        return None
+    if not letra.isupper():
+        assert False
+    return letra
+
+
 if __name__ == "__main__":
-    print("""Import this module.
-""")
+    print("Import this module.")

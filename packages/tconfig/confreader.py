@@ -6,13 +6,19 @@ Module for reading configuration files.
 
 import os
 from copy import deepcopy
+from yglob import which_drive_letter, gen_pathname
 
 # pylint: disable=missing-function-docstring, unused-argument, invalid-name, no-self-use, attribute-defined-outside-init
 
-#
-# run_confreader()
-#
+
 def run_confreader(outFile, errFile, args):
+    """
+    Main, testing function
+    :param outFile: output stream
+    :param errFile: error stream
+    :param args: arguments
+    :return: int, error-code
+    """
     if args == []:
         return basic_test_confreader(outFile, errFile, ["a"])
     code = basic_test_confreader(outFile, errFile, args)
@@ -33,12 +39,9 @@ def basic_test_confreader(outFile, errFile, inArgs):
     return None
 
 
-#
-# CLASS ConfHome (abstract)
-#
 class ConfHome():
     """
-    Home Configuration class
+    Home Configuration abstract class
     """
     def _init_conf_home(self, autoConf=False):
         self.lastPath = None
@@ -46,37 +49,85 @@ class ConfHome():
         self.homeDirRewrite = "allow"
         self.basicEncoding = "ISO-8859-1"
         self.sepMultipleValue = ";"
-        self.vars = dict()
+        self._vars = dict()
         if autoConf:
             self._set_config()
+        self._genVar = dict()
 
 
     def _set_config(self):
         self.set_home()
 
 
+    def all_vars(self):
+        return self._vars
+
+    def has_var(self, name):
+        return name in self._vars
+
+    def get_var(self, name):
+        return self._vars.get(name)
+
+    def var_value(self, name):
+        value = self._vars[name]
+        return value
+
+    def get_gen_var(self, a_key):
+        return self._genVar.get(a_key)
+
+
     def set_home(self, newHome=None):
         if newHome is not None:
             self.homeDir = newHome
-            self.vars["HOME"] = newHome
+            self._vars["HOME"] = newHome
             return True
-        try:
-            userProfile = os.environ[ "USERPROFILE" ]
-        except KeyError:
-            userProfile = None
+        userProfile = os.environ.get("USERPROFILE")
         if userProfile is None:
             userProfile = os.environ[ "HOME" ]
         isDir = os.path.isdir( userProfile )
         isOk = isDir
         if isDir:
             self.homeDir = userProfile
-        self.vars["HOME"] = self.homeDir
+        self._vars["HOME"] = self.homeDir
         return isOk
 
 
-#
-# CLASS ConfReader
-#
+    def hash_generic_var(self, dicts=None, words=None):
+        """
+        Hashes to generic var (at '_genVar')
+        :param dicts:
+        :param words:
+        :return: the list of 'keys' stored
+        """
+        def key_value(s):
+            if s.find("/") >= 0 or s.find("\\") or which_drive_letter(s) is not None:
+                return gen_pathname(s)
+            return s
+
+        res = []
+        if words is None:
+            match_keys = None
+            if dicts is None:
+                match_keys = ("USERPROFILE", "HOME")
+        else:
+            match_keys = words
+            assert isinstance(words, (list, tuple))
+        if dicts is None:
+            ds = (os.environ,)
+        elif isinstance(dicts, (list, tuple)):
+            ds = dicts
+        for a_dict in ds:
+            keys = list(a_dict.keys())
+            keys.sort()
+            for k in keys:
+                if words is not None and k not in match_keys:
+                    continue
+                if k not in self._genVar:
+                    self._genVar[k] = key_value(a_dict[k])
+                res.append(k)
+        return res
+
+
 class ConfReader(ConfHome):
     """
     Configuration Reader class
@@ -85,7 +136,7 @@ class ConfReader(ConfHome):
         self._init_conf_home( autoConf )
         self.conf = dict()
         self.paths = dict()
-        self.vars, self.varList = dict(), dict()
+        self._vars, self.varList = dict(), dict()
         self.varTuples = []
 
 
@@ -96,7 +147,7 @@ class ConfReader(ConfHome):
     def add_var(self, left, right, checkExists=False):
         assert isinstance(checkExists, bool)
         if checkExists:
-            isThere = left in self.vars
+            isThere = left in self._vars
             if isThere:
                 return False
         if isinstance(right, (list, tuple)):
@@ -113,7 +164,7 @@ class ConfReader(ConfHome):
                 return False
         else:
             assert False
-        self.varTuples = self._tuples_from_vars( self.vars )
+        self.varTuples = self._tuples_from_vars( self._vars )
         return True
 
 
@@ -154,7 +205,7 @@ class ConfReader(ConfHome):
         if debug > 0:
             print("Debug: update():", msg)
         assert msg == ""
-        self.varTuples = self._tuples_from_vars(self.vars)
+        self.varTuples = self._tuples_from_vars(self._vars)
         return isOk
 
 
@@ -279,19 +330,19 @@ class ConfReader(ConfHome):
         if eq == "=":
             if debug > 0:
                 print("Debug: assign L=R: {}={}".format( left, s ))
-            self.vars[ left ] = s
-            self.vars[ leftList ] = [ s ]
+            self._vars[ left ] = s
+            self._vars[ leftList ] = [ s ]
             self.varList[ left ] = [ s ]
         elif eq == "+=":
-            there = self.vars[ left ]
+            there = self._vars[ left ]
             there += self.sepMultipleValue
             there += s
-            self.vars[ left ] = there
-            self.vars[ leftList ].append( s )
+            self._vars[ left ] = there
+            self._vars[ leftList ].append( s )
             self.varList[ left ].append( s )
             if debug > 0:
                 print("Debug: assign L+=R: {}={};\n\tvars:{}\n\tvarList:{}\n".
-                      format( left, s, self.vars[left], self.varList[left] ))
+                      format( left, s, self._vars[left], self.varList[left] ))
         else:
             assert False
         return True
@@ -299,7 +350,7 @@ class ConfReader(ConfHome):
 
     def _cache_vars(self):
         assert self.homeDir[-1] != "/"
-        cache = {"$HOME/": self.homeDir+"/",
+        cache = {"$HOME/": gen_pathname(self.homeDir)+"/",
                  }
         return cache
 
@@ -329,10 +380,12 @@ class ConfReader(ConfHome):
         return r
 
 
-#
-# sorted_dict()
-#
 def sorted_dict(aDict):
+    """
+    Sorted dictionary
+    :param aDict: input dictionary
+    :return: (keys, values)
+    """
     ks = []
     res = []
     if isinstance(aDict, dict):
@@ -351,10 +404,13 @@ def sorted_dict(aDict):
     return res, ks
 
 
-#
-# valid_var()
-#
 def valid_var(s, others=("/", "_")):
+    """
+    Valid var name
+    :param s: var name
+    :param others: extra allowed chars
+    :return: bool, True is is allowed.
+    """
     isOk = s[0].isalpha()
     if not isOk:
         return False
@@ -366,10 +422,13 @@ def valid_var(s, others=("/", "_")):
     return isOk
 
 
-#
-# valid_rside()
-#
 def valid_rside(s, invalids=None):
+    """
+    Returns right side of a string
+    :param s: input string
+    :param invalids: invalid strings
+    :return: bool, True, whether string is valid
+    """
     if invalids is None:
         invalids = ("\t", "  ",)
     else:
@@ -386,8 +445,7 @@ def valid_rside(s, invalids=None):
 bConfig = ConfReader()
 
 
-# Main script
-
+# Module short tests
 if __name__ == "__main__":
     import sys
     CODE = run_confreader(sys.stdout, sys.stderr, sys.argv[1:])

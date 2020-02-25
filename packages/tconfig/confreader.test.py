@@ -50,7 +50,7 @@ backup_files+=my.tar
             print("")
     bConfig.update()
     idx = 0
-    for items in (bConfig.vars.items(),
+    for items in (bConfig.all_vars().items(),
                   bConfig.varList.items()):
         idx += 1
         for var, value in items:
