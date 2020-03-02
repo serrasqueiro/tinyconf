@@ -124,7 +124,7 @@ class FilePack(GenFile):
                 else:
                     s = textual.replace("\r", "")
                     self.payload = ("txt", s)
-            elif basicText is "a":
+            elif basicText == "a":
                 with self.handler.open(subName, "r") as fp:
                     data = fp.read()
                 textual = data.decode("ascii")
