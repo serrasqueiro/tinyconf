@@ -6,7 +6,6 @@ Yet another Date module!
 
 # pylint: disable=missing-function-docstring, invalid-name, chained-comparison, no-self-use
 
-
 import copy
 import datetime
 
@@ -27,14 +26,21 @@ def run_tests():
     assert str(w) == t
     assert w == other_w
     assert yDate.date == zDate.date
+    try:
+        t = zDate.str_date(30200215)
+    except ValueError:
+        t = None
+    assert t is None
+    t = zDate.str_date(20200215)
+    print("zDate' is: {}, (type: {})".format(t, type(t)))
     return True
 
 
 class GenFDate():
     """
-    Generic Functional Date
+    GenFDate is a generic functional Date class
     """
-    def __init__ (self, aDate=None):
+    def __init__(self, aDate=None):
         self.date = None
         if aDate is None:
             s = "-"
@@ -47,10 +53,10 @@ class GenFDate():
                 s = aDate
         else:
             assert False
-        self._set_date_time( s )
+        self._set_date_time(s)
 
 
-    def str_date (self, aDate, hasTime=True):
+    def str_date(self, aDate, hasTime=True):
         if aDate is None:
             return "-"
         h, m, s = 0, 0, 0
@@ -63,12 +69,12 @@ class GenFDate():
                 assert False
         elif isinstance(aDate, int):
             v = aDate
-            if v >= 2000*100*100 and v < 2200*100*100:
+            if 2000*100*100 <= v < 2200*100*100:
                 s = str(v)
             elif v == 0:
                 s = "-"
             else:
-                assert False
+                raise ValueError
             return s
         else:
             print("Bogus type:", type(aDate))
@@ -83,12 +89,14 @@ class GenFDate():
         return self
 
 
-    def date_from (self, tup, hasTime=None):
-        if isinstance(tup, tuple):
+    def date_from(self, tup, hasTime=None):
+        if isinstance(tup, (list, tuple)):
             if len(tup) == 3:
-                if hasTime is None: hasTime = False
+                if hasTime is None:
+                    hasTime = False
             elif len(tup) == 6:
-                if hasTime is None: hasTime = True
+                if hasTime is None:
+                    hasTime = True
             else:
                 assert False
             if hasTime:
@@ -102,18 +110,21 @@ class GenFDate():
         return s
 
 
-    def conv_datetime (self, aDtTm, hasTime=True):
+    def conv_datetime(self, aDtTm, hasTime=True):
+        year, month, day = 0, 0, 0
+        h, m, s = 0, 0, 0
         if isinstance(aDtTm, datetime.datetime):
-            year, month, day, h, m, s, _ = aDtTm.year, aDtTm.month, aDtTm.day, aDtTm.hour, aDtTm.minute, aDtTm.second, aDtTm.microsecond
+            year, month, day = aDtTm.year, aDtTm.month, aDtTm.day
+            h, m, s, _ = aDtTm.hour, aDtTm.minute, aDtTm.second, aDtTm.microsecond
         elif isinstance(aDtTm, (tuple, list)):
             if hasTime:
                 year, month, day, h, m, s = aDtTm
             else:
                 year, month, day = aDtTm
         elif isinstance(aDtTm, int):
-            newDateTime = self.conv_from_timestamp( aDtTm )
+            newDateTime = self.conv_from_timestamp(aDtTm)
             assert isinstance(newDateTime, datetime.datetime)
-            s = self.conv_datetime( newDateTime )
+            s = self.conv_datetime(newDateTime)
         else:
             assert False
         if hasTime:
@@ -123,13 +134,13 @@ class GenFDate():
         return s
 
 
-    def conv_from_timestamp (self, aStamp):
+    def conv_from_timestamp(self, aStamp):
         assert isinstance(aStamp, int)
         aDtTm = datetime.datetime.fromtimestamp(aStamp)
         return aDtTm
 
 
-    def get_iso_date (self, s):
+    def get_iso_date(self, s):
         if isinstance(s, int):
             aDtTm = self.conv_from_timestamp(s)
         elif isinstance(s, str):
@@ -139,7 +150,7 @@ class GenFDate():
         return aDtTm
 
 
-    def _shown_date (self, year, month, day, h, m, s, hasTime=True):
+    def _shown_date(self, year, month, day, h, m, s, hasTime=True):
         if hasTime:
             s = "{:04}-{:02}-{:02} {:02}:{:02}:{:02}".format(year, month, day, h, m, s)
         else:
@@ -147,14 +158,14 @@ class GenFDate():
         return s
 
 
-    def _set_date_time (self, aDate):
+    def _set_date_time(self, aDate):
         assert isinstance(aDate, str)
         s = aDate
         self.date = s
         return s != "-"
 
 
-    def __str__ (self):
+    def __str__(self):
         return self.date
 
 

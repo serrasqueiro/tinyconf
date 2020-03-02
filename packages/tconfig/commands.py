@@ -1,5 +1,5 @@
 """
-Module for handling short backups.
+Pipe-open, command execution
 
 (c)2020  Henrique Moreira (part of 'tconfig')
 """
@@ -10,6 +10,8 @@ import sys
 from sys import stdout
 import os
 import subprocess
+
+# pylint: disable=missing-function-docstring, invalid-name
 
 
 def run_cmd (cmd, out_file=sys.stdout, show_cmd=False, auto_subst=True):
@@ -60,8 +62,8 @@ def safe_name (s, autoConv=True):
         res = []
         for x in s:
             y = safe_name(x, autoConv)
-            res.append( y )
-        return tuple( res )
+            res.append(y)
+        return tuple(res)
     else:
         assert False
     isWin = os.name == "nt"
@@ -107,14 +109,14 @@ def split_blanks (s):
             elif c == " ":
                 if q == 0:
                     if buf != "":
-                        res.append( buf )
+                        res.append(buf)
                     buf = ""
             else:
                 buf += c
     else:
         assert False
     if res != "":
-        res.append( buf )
+        res.append(buf)
     return res
 
 
@@ -133,40 +135,6 @@ def smart_subst (s, whatSubst):
         if a != "":
             res.append( a )
     return res
-
-
-def cut_excess (s, chars=" "):
-    """
-    Cut excessive blanks, or other chars.
-    :param s: string
-    :param chars: string, or list of replacements
-    :return: string
-    """
-    q = s
-    if isinstance(chars, str):
-        for y in chars:
-            x = y+y
-            tup = (x, y)
-            if y:
-                q = cut_excess(q, (tup,))
-        return q
-    assert isinstance(chars, (tuple, list))
-    guard = 1000
-    seqs = chars
-    for thisByThat in seqs:
-        guard -= 1
-        if guard < 0:
-            return s
-        assert len(thisByThat) == 2
-        x, y = thisByThat
-        assert x != y
-        q = s
-        while q:
-            s = q.replace(x, y)
-            if s == q:
-                return s
-            q = s
-    return ""
 
 
 def sane_git_comment(s):
@@ -198,11 +166,6 @@ def find_any (aList, anyOf):
         elif isinstance(anyOf, str):
             s = anyOf
             matches = a.find( s ) >= 0
-        else:
-            assert False
-        if matches:
-            res.append(a)
-    return res
 
 
 def change_dir (toPath):

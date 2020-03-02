@@ -6,9 +6,21 @@ Yet another Logger module!
 
 # pylint: disable=missing-function-docstring, invalid-name, no-self-use
 
-from sys import stdout, stderr
+from sys import stdout
 import os
-from yadate import GenFDate
+import yadate
+
+
+def run_test (param):
+    """
+    Run basic test
+    :param param: system parameters
+    :return:
+    """
+    for a in param:
+        aLog = GenLog( a )
+        aLog.dump()
+    return 0
 
 
 class GenLog():
@@ -22,7 +34,7 @@ class GenLog():
         if sFile is None:
             self.stream = None
         else:
-            self.stream = self._try_text( sFile )
+            self.stream = self._try_text(sFile)
         if aDate is None:
             s = "-"
         else:
@@ -32,12 +44,12 @@ class GenLog():
         self.logDate = s
 
 
-    def to_list (self):
+    def to_list(self):
         res = self.stream.read().split("\n")
         return res
 
 
-    def add_lines (self):
+    def add_lines(self):
         if self.stream is not None:
             textList = self.to_list()
             self.lines += textList
@@ -63,52 +75,33 @@ class GenLog():
                     idx += 1
             if idxOk > 0:
                 if sMsgAt.count("T") == 1:
-                    s = " ".join( sMsgAt.split("T") )
+                    s = " ".join(sMsgAt.split("T"))
                     when = s[:-1] if s.endswith("Z") else s
                 else:
                     when = sMsgAt
-                finDate = GenFDate(when)
+                finDate = yadate.GenFDate(when)
                 self.info["build"] = (sMsgAt, finDate)
             else:
                 self.info["fail"] = ("failed", "-")
         return True
 
 
-    def dump (self, outFile=stdout):
+    def dump(self, outFile=stdout):
         for a in self.lines:
             outFile.write(a)
             outFile.write("\n")
         return True
 
 
-    def find_any (self, s, s_filter=None):
-        for a in self.lines:
-            if a.find( s ) >= 0:
-                return a
-        return None
-
-
-    def _try_text (self, sFile):
-        isFile = os.path.isfile( sFile )
-        if not isFile:
-            return None
+    def _try_text(self, sFile):
+        isFile = os.path.isfile(sFile)
+        f = None
         try:
-            f = open(sFile, "r")
+            if isFile:
+                f = open(sFile, "r")
         except FileNotFoundError:
-            f = None
+            pass
         return f
-
-
-def run_test (param):
-    """
-    Run basic test
-    :param param: system parameters
-    :return:
-    """
-    for a in param:
-        aLog = GenLog( a )
-        aLog.dump()
-    return 0
 
 
 #
