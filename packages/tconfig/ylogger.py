@@ -4,18 +4,21 @@ Yet another Logger module!
 (c)2020  Henrique Moreira (part of 'tconfig')
 """
 
-from sys import stdout, stdin, stderr
+# pylint: disable=missing-function-docstring, invalid-name, no-self-use
+
+from sys import stdout, stderr
 import os
-from yadate import *
+from yadate import GenFDate
 
 
-#
-# CLASS GenLog
-#
 class GenLog():
-    def __init__ (self, sFile=None, autoRead=True, aDate=None, lines=[]):
+    """
+    Generic Logging
+    """
+    def __init__ (self, sFile=None, autoRead=True, aDate=None, lines=None):
+        assert isinstance(autoRead, bool)
         self.info = dict()
-        self.lines = lines
+        self.lines = lines if lines else []
         if sFile is None:
             self.stream = None
         else:
@@ -43,23 +46,23 @@ class GenLog():
         idx, idxOk = 0, 0
         sMsgAt = "-"
         if self.info is not None:
-            assert type(self.info)==dict
+            assert isinstance(self.info, dict)
             for a in textList:
                 idx += 1
                 s = a.rstrip()
                 if s.endswith("[INFO] BUILD SUCCESS"):
                     idxOk = idx
-            if idxOk>0:
+            if idxOk > 0:
                 idx = idxOk
-                while idx<idxOk+5:
+                while idx < idxOk+5:
                     a = textList[idx]
                     spl = a.split("[INFO] Finished at:")
-                    if len(spl)>1:
+                    if len(spl) > 1:
                         sMsgAt = spl[-1].strip()
                         break
                     idx += 1
-            if idxOk>0:
-                if sMsgAt.count("T")==1:
+            if idxOk > 0:
+                if sMsgAt.count("T") == 1:
                     s = " ".join( sMsgAt.split("T") )
                     when = s[:-1] if s.endswith("Z") else s
                 else:
@@ -78,31 +81,40 @@ class GenLog():
         return True
 
 
+    def find_any (self, s, s_filter=None):
+        for a in self.lines:
+            if a.find( s ) >= 0:
+                return a
+        return None
+
+
     def _try_text (self, sFile):
         isFile = os.path.isfile( sFile )
+        if not isFile:
+            return None
         try:
             f = open(sFile, "r")
-        except:
+        except FileNotFoundError:
             f = None
         return f
 
 
-#
-# run_test()
-#
 def run_test (param):
+    """
+    Run basic test
+    :param param: system parameters
+    :return:
+    """
     for a in param:
         aLog = GenLog( a )
         aLog.dump()
+    return 0
+
 
 #
 # Main script
 #
 if __name__ == "__main__":
     import sys
-    param = sys.argv[1:]
-    if param:
-        code = run_test(param)
-    else:
-        code = run_test( [ sys.argv[0] ] )
-    sys.exit(code)
+    CODE = run_test(sys.argv[1:])
+    sys.exit(CODE)

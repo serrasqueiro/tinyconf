@@ -4,21 +4,44 @@ Yet another Date module!
 (c)2020  Henrique Moreira (part of 'tconfig')
 """
 
+# pylint: disable=missing-function-docstring, invalid-name, chained-comparison, no-self-use
+
+
 import copy
 import datetime
 
 
-#
-# CLASS GenFDate
-#
+def run_tests():
+    xDate = GenFDate("now")
+    yDate = GenFDate((2020, 1, 19, 12, 58, 59))
+    zDate = GenFDate()
+    zDate.dup(yDate)
+    t = str(yDate)
+    assert f"{yDate}" == f"{zDate}"
+    s = "GenFDate('now')={}, yDate={}".format(xDate, yDate)
+    print("Message", s)
+    w = xDate.get_iso_date("2020-01-19 12:58:59")
+    w_int = int(w.timestamp())
+    other_w = xDate.get_iso_date(w_int)
+    print("ISO date: {} = {}".format(w, other_w))
+    assert str(w) == t
+    assert w == other_w
+    assert yDate.date == zDate.date
+    return True
+
+
 class GenFDate():
+    """
+    Generic Functional Date
+    """
     def __init__ (self, aDate=None):
+        self.date = None
         if aDate is None:
             s = "-"
-        elif type(aDate)==tuple:
+        elif isinstance(aDate, tuple):
             s = self.date_from(aDate)
-        elif type(aDate)==str:
-            if aDate=="now":
+        elif isinstance(aDate, str):
+            if aDate == "now":
                 s = self.conv_datetime(datetime.datetime.now())
             else:
                 s = aDate
@@ -31,18 +54,18 @@ class GenFDate():
         if aDate is None:
             return "-"
         h, m, s = 0, 0, 0
-        if type( aDate )==tuple:
-            if len(aDate)==3:
+        if isinstance(aDate, tuple):
+            if len(aDate) == 3:
                 year, month, day = aDate
-            elif len(aDate)==6:
+            elif len(aDate) == 6:
                 year, month, day, h, m, s = aDate
             else:
                 assert False
-        elif type( aDate )==int:
+        elif isinstance(aDate, int):
             v = aDate
-            if v>=2000*100*100 and v<2200*100*100:
+            if v >= 2000*100*100 and v < 2200*100*100:
                 s = str(v)
-            elif v==0:
+            elif v == 0:
                 s = "-"
             else:
                 assert False
@@ -55,16 +78,16 @@ class GenFDate():
 
 
     def dup (self, aDate):
-        if isinstance(aDate,GenFDate):
+        if isinstance(aDate, GenFDate):
             self.date = copy.deepcopy(aDate.date)
         return self
 
 
     def date_from (self, tup, hasTime=None):
-        if type( tup )==tuple:
-            if len(tup)==3:
+        if isinstance(tup, tuple):
+            if len(tup) == 3:
                 if hasTime is None: hasTime = False
-            elif len(tup)==6:
+            elif len(tup) == 6:
                 if hasTime is None: hasTime = True
             else:
                 assert False
@@ -82,12 +105,12 @@ class GenFDate():
     def conv_datetime (self, aDtTm, hasTime=True):
         if isinstance(aDtTm, datetime.datetime):
             year, month, day, h, m, s, _ = aDtTm.year, aDtTm.month, aDtTm.day, aDtTm.hour, aDtTm.minute, aDtTm.second, aDtTm.microsecond
-        elif type( aDtTm ) in (tuple, list):
+        elif isinstance(aDtTm, (tuple, list)):
             if hasTime:
                 year, month, day, h, m, s = aDtTm
             else:
                 year, month, day = aDtTm
-        elif type( aDtTm )==int:
+        elif isinstance(aDtTm, int):
             newDateTime = self.conv_from_timestamp( aDtTm )
             assert isinstance(newDateTime, datetime.datetime)
             s = self.conv_datetime( newDateTime )
@@ -101,15 +124,15 @@ class GenFDate():
 
 
     def conv_from_timestamp (self, aStamp):
-        assert type( aStamp )==int
+        assert isinstance(aStamp, int)
         aDtTm = datetime.datetime.fromtimestamp(aStamp)
         return aDtTm
 
 
     def get_iso_date (self, s):
-        if type( s )==int:
-            aDtTm = conv_from_timestamp(s)
-        elif type( s )==str:
+        if isinstance(s, int):
+            aDtTm = self.conv_from_timestamp(s)
+        elif isinstance(s, str):
             aDtTm = datetime.datetime.fromisoformat(s)
         else:
             assert False
@@ -125,10 +148,10 @@ class GenFDate():
 
 
     def _set_date_time (self, aDate):
-        assert type( aDate )==str
+        assert isinstance(aDate, str)
         s = aDate
         self.date = s
-        return s!="-"
+        return s != "-"
 
 
     def __str__ (self):
@@ -143,15 +166,4 @@ if __name__ == "__main__":
 
 Follow basic tests.
 """)
-    xDate = GenFDate( "now" )
-    yDate = GenFDate( (2020, 1, 19, 12, 58, 59) )
-    zDate = GenFDate()
-    zDate.dup( yDate )
-    t = str(yDate)
-    assert f"{yDate}"==f"{zDate}"
-    s = "GenFDate('now')={}, yDate={}".format( xDate, yDate )
-    print("Message", s)
-    w = xDate.get_iso_date("2020-01-19 12:58:59")
-    print("ISO date:", w)
-    assert str(w)==t
-    assert yDate.date==zDate.date
+    run_tests()

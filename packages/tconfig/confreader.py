@@ -12,9 +12,10 @@ from copy import deepcopy
 # test_confreader()
 #
 def test_confreader (outFile, errFile, inArgs):
-    if inArgs==[]: return test_confreader(outFile, errFile, ["a"])
+    if inArgs == []:
+        return test_confreader(outFile, errFile, ["a"])
     cmd = inArgs[0]
-    if cmd=="a":
+    if cmd == "a":
         bConfig.set_home()
         print("bConfig.homeDir:", bConfig.homeDir)
         isOk = bConfig.reader(".tec.conf", "tec")
@@ -27,10 +28,10 @@ def test_confreader (outFile, errFile, inArgs):
     return None
 
 
-#
-# CLASS ConfHome (abstract)
-#
 class ConfHome():
+    """
+    Abstract class ConfHome
+    """
     def _init_conf_home (self, autoConf=False):
         self.lastPath = None
         self.homeDir = None
