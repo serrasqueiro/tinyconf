@@ -4,25 +4,27 @@ Module that handles file packs, such as zip-files.
 (c)2020  Henrique Moreira (part of 'tconfig')
 """
 
+# pylint: disable=missing-function-docstring, attribute-defined-outside-init, invalid-name
 
 from zipfile import ZipFile
-from yadate import *
+import yadate
 
 
-#
-# CLASS GenFile (abstract)
-#
 class GenFile():
+    """
+    Abstract class Generic File
+    """
     def init_genfile (self, name, aStat, nick=None):
         self.pathName, self.nick = name, nick
-        if name is not None: self.set_name( name )
+        if name is not None:
+            self.set_name( name )
         self.payload = (None, "")
         self.lastCRC = -1
         self.lastEncoding = None
 
 
-    def set_name (self, name):
-        assert type( name )==str
+    def set_name(self, name):
+        assert isinstance(name, str)
         self.pathName = name
         aName = name.lower()
         if aName.endswith(".zip"):
@@ -36,13 +38,14 @@ class GenFile():
         textualHint, data = self.payload
         assert data is not None
         v = 0
-        if textualHint=="txt":
+        if textualHint == "txt":
             for c in data:
-                if skipCR and c=="\r": continue
+                if skipCR and c == "\r": continue
                 v = (v + ord(c)) % 65537
-        elif textualHint=="bin":
+        elif textualHint == "bin":
             for c in data:
-                if skipCR and chr(c)=="\r": continue
+                if skipCR and chr(c) == "\r":
+                    continue
                 v = (v + c) % 65537
         else:
             assert False
@@ -50,10 +53,10 @@ class GenFile():
         return v
 
 
-#
-# CLASS ATextFile
-#
 class ATextFile(GenFile):
+    """
+    Text File class
+    """
     def __init__ (self, name, nick=None, autoOpen=True):
         self.init_genfile( name, None, nick )
 
@@ -83,10 +86,10 @@ class ATextFile(GenFile):
         return ""
 
 
-#
-# CLASS FilePack
-#
 class FilePack(GenFile):
+    """
+    FilePack class
+    """
     def __init__ (self, name, aStat=None, nick=None, autoOpen=True):
         self.init_genfile( name, aStat, nick )
         self.subs, self.zipFileList, self.orderedList = [], [], []
@@ -97,12 +100,12 @@ class FilePack(GenFile):
 
 
     def _open_file (self, aKind):
-        if aKind=="zip":
+        if aKind == "zip":
             self.isZip = True
-            z = ZipFile( self.pathName )
+            z = ZipFile(self.pathName)
             self._update_from_zipinfo(z.namelist(), z.filelist, z)
         else:
-            z = open(self.name, "rb")
+            z = open(self.pathName, "rb")
         self.handler = z
         return True
 
@@ -142,7 +145,7 @@ class FilePack(GenFile):
         self.subs, self.zipFileList, self.orderedList = nameList, fileList, []
         sOrder = []
         for elem in fileList:
-            yDate = GenFDate( elem.date_time )
+            yDate = yadate.GenFDate( elem.date_time )
             s = "{} {}".format( yDate, elem.filename )
             sOrder.append( s )
         sOrder.sort()

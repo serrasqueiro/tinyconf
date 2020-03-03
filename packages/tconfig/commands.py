@@ -151,21 +151,28 @@ def sane_git_comment(s):
 def find_any (aList, anyOf):
     """
     Find 'anyOf' strings within list
-    :param aList:
-    :param anyOf:
+    :param aList: input list
+    :param anyOf: any of the following tuples, or one string
     :return: list, with the matches
     """
     res = []
     for a in aList:
         matches = False
         if isinstance(anyOf, (list, tuple)):
-            for b in anyOf:
-                if a.find( b ) >= 0:
-                    matched = True
+            for s in anyOf:
+                if a.find( s ) >= 0:
+                    matches = True
                     break
         elif isinstance(anyOf, str):
             s = anyOf
             matches = a.find( s ) >= 0
+        elif isinstance(anyOf, int):
+            matches = anyOf == a
+        else:
+            assert False
+        if matches:
+            res.append(a)
+    return res
 
 
 def change_dir (toPath):

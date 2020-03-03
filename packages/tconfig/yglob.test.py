@@ -7,7 +7,7 @@ Module for testing yglob.py
 # pylint: disable=missing-function-docstring, invalid-name
 
 import yglob
-from yglob import DirList
+from archs.dirs import DirList
 from confreader import bConfig
 
 #
@@ -33,7 +33,7 @@ def test_yglob(outFile, errFile, inArgs):
     print("Test {}: {}".format(cmd, param))
     for a in param:
         dl = DirList(a)
-        listed = dl.dir_list
+        listed = dl.folders + dl.entries
         print("{} (#{}):\n{}".format(a, len(listed), yglob.tense_list(listed, "\t")))
     return 0
 

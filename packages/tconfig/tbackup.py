@@ -195,10 +195,12 @@ def update_zip(outFile, zipName, direx, lists, opts=None, debug=0):
     return code
 
 
-#
-# zip_result_str()
-#
 def zip_result_str(aList):
+    """
+    Zip result string
+    :param aList: input list
+    :return: string
+    """
     if isinstance(aList, (list, tuple)):
         isOk = len(aList)>0 and aList[-1]==""
         if isOk:
@@ -208,13 +210,15 @@ def zip_result_str(aList):
         s = s.replace("updating:", "updated")
     elif isinstance(aList, str):
         s = aList
+    else:
+        assert False
     return s
 
 
-#
-# listing()
-#
 def listing(outFile, errFile, cmd, direx, pnames, opts, debug=0):
+    """
+    Listing
+    """
     assert errFile is not None
     lists = dict()
     verbose = opts["verbose"]
@@ -245,7 +249,7 @@ def listing(outFile, errFile, cmd, direx, pnames, opts, debug=0):
             msg = "ok"
             if ext==".zip":
                 s = "unzip -l {}".format( p )
-                tList = commands.run_cmd(s, None, showCmd=True)
+                tList = commands.run_cmd(s, None, show_cmd=True)
                 idx = 0
                 aTemp = None
                 zipDumpLimit = "-" * 5

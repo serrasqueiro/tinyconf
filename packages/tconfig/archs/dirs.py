@@ -4,10 +4,10 @@ Module for handling direntry/ directories.
 (c)2020  Henrique Moreira (part of 'tconfig')
 """
 
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring, invalid-name, no-self-use
 
-from os import scandir
 import os
+from os import scandir
 
 
 class DirList():
@@ -49,8 +49,9 @@ class DirList():
     def _init_from_path(self, path):
         self.entries = []
         self.folders = []
-        if os.path.isdir(path):
-            self.entries, self.folders, self.all = self._scan_dir(path)
+        where = path_where(path)
+        if os.path.isdir(where):
+            self.entries, self.folders, self.all = self._scan_dir(where)
         else:
             return False
         return True
@@ -68,6 +69,16 @@ class DirList():
                 lst.append(s)
             entries.append(entry)
         return (lst, folders, entries)
+
+
+def path_where(where):
+    s = where
+    if os.name == "nt":
+        if len(where) >= 3 and where[1].isupper() and where[0] + where[2] == "//":
+            letter = where[1]
+            assert 'A' <= letter <= 'Z'
+            s = letter + ":" + where[2:]
+    return s
 
 
 #

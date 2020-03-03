@@ -4,7 +4,7 @@ Yet another glob!
 (c)2020  Henrique Moreira (part of 'tconfig')
 """
 
-# pylint: disable=too-few-public-methods
+# pylint: disable=invalid-name
 
 import os
 
@@ -14,7 +14,8 @@ class LPath():
     LPath - Linear path
     """
     def __init__(self, path=""):
-        self.w = self._init_path(path)
+        self.w = ""
+        self._init_path(path)
 
 
     def _init_path(self, path):
@@ -28,6 +29,7 @@ class LPath():
                 s += linear_path(a)
         else:
             assert False
+        self.w = s
         return s
 
 
@@ -44,53 +46,23 @@ class LPath():
         return s
 
 
-class DirList():
-    """
-    DirList - Directory list
-    """
-    def __init__(self, where=None, a_desc=""):
-        if where is not None:
-            self._init_at(where, a_desc)
-
-
-    def _init_at(self, where, a_desc):
-        assert isinstance(a_desc, str)
-        self.path = LPath(where)
-        self.desc = a_desc
-        self.dir_list = self._scan_dir()
-
-
-    def _scan_dir(self):
-        where = self.path.w
-        if os.name == "nt":
-            if len(where) >= 3 and where[1].isupper() and where[0]+where[2] == "//":
-                letter = where[1]
-                assert 'A' <= letter <= 'Z'
-                where = letter+":"+where[2:]
-        try:
-            listed = os.listdir(where)
-        except NotADirectoryError:
-            listed = None
-        return listed
-
-
 def tense_list(listing, line_sep, by_line="\n"):
     """
     Display 'listing' as a string, each line preceded by 'line_sep', and
     separated by 'by_line' string.
-    :param listing:
-    :param line_sep:
-    :param by_line:
+    :param listing: list/ tuples
+    :param line_sep: string before each line
+    :param by_line: new line string
     :return: string, the expanded string.
     """
     s = ""
+    assert isinstance(listing, (list, tuple))
     assert isinstance(line_sep, str)
     assert isinstance(by_line, str)
     for a in listing:
         s += line_sep + a
         s += by_line
     return s
-
 
 
 def gen_pathname(s, os_check=True):
