@@ -7,7 +7,6 @@ Pipe-open, command execution
 # pylint: disable=missing-function-docstring, invalid-name
 
 import sys
-from sys import stdout
 import os
 import subprocess
 

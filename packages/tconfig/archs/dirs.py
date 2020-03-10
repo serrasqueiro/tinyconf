@@ -21,6 +21,8 @@ class DirList():
         if path:
             self._init_from_path(path)
 
+    def is_ok(self):
+        return self._did_scan
 
     def get_dir(self, path=None):
         if path is None:
@@ -29,8 +31,8 @@ class DirList():
             p = path
         if p is None:
             return False
-        self._init_from_path(p)
-        return True
+        is_ok = self._init_from_path(p)
+        return is_ok
 
     def get_last_dir(self):
         return self._path
@@ -79,6 +81,12 @@ def path_where(where):
             assert 'A' <= letter <= 'Z'
             s = letter + ":" + where[2:]
     return s
+
+
+def basename_str(s):
+    if isinstance(s, str):
+        return os.path.basename(s)
+    return ""
 
 
 #

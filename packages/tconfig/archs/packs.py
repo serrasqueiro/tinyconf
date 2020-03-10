@@ -40,7 +40,8 @@ class GenFile():
         v = 0
         if textualHint == "txt":
             for c in data:
-                if skipCR and c == "\r": continue
+                if skipCR and c == "\r":
+                    continue
                 v = (v + ord(c)) % 65537
         elif textualHint == "bin":
             for c in data:
@@ -57,7 +58,7 @@ class ATextFile(GenFile):
     """
     Text File class
     """
-    def __init__ (self, name, nick=None, autoOpen=True):
+    def __init__ (self, name, nick=None):
         self.init_genfile( name, None, nick )
 
 
@@ -77,7 +78,7 @@ class ATextFile(GenFile):
             try:
                 with open( self.pathName, "r", encoding=anEncoding ) as fp:
                     data = fp.read()
-            except:
+            except FileNotFoundError:
                 data = None
             if data is not None:
                 self.payload = ("txt", data)
@@ -141,7 +142,8 @@ class FilePack(GenFile):
         return miniCRC
 
 
-    def _update_from_zipinfo (self, nameList, fileList, z=None):
+    def _update_from_zipinfo (self, nameList, fileList, z):
+        assert z is not None  # Unused
         self.subs, self.zipFileList, self.orderedList = nameList, fileList, []
         sOrder = []
         for elem in fileList:
