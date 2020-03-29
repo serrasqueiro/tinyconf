@@ -20,6 +20,7 @@ def test_yglob(outFile, errFile, inArgs):
     """
     assert outFile is not None
     assert errFile is not None
+    bConfig.set_home()
     ks = bConfig.hash_generic_var(words=("HOME", "MEDIA", "HOMEDRIVE"))
     for k in ks:
         val = bConfig.get_gen_var(k)
@@ -43,6 +44,8 @@ def test_yglob(outFile, errFile, inArgs):
         code = test_a(bConfig, param)
     elif cmd == "b":
         code = test_b(bConfig, param)
+    elif cmd == "c":
+        code = test_c(bConfig, param)
     else:
         code = None
     return code
@@ -69,6 +72,27 @@ def test_b(bconf, param):
     return 0
 
 
+def test_c(bconf, param):
+    if param == []:
+        vlist = ["HOME", "ONEDRIVE"]
+    else:
+        vlist = param
+    bconf.hash_generic_var( words=vlist )
+    all = bconf.all_vars()
+    print("all_vars():", all)
+    print("gen_vars():", bconf.get_gen_vars())
+    gv_lr = ["{}={}".format(x, bconf.get_gen_var(x)) for x in bconf.get_gen_vars()]
+    s = yglob.tense_list(gv_lr, "\t")
+    print("bConfig._genVar:\n{}\n---".format(s))
+    print("vlist:", vlist)
+    for k in vlist:
+        val = bconf.get_gen_var(k)
+        print("Adding var '{}', with val={}".format(k, val))
+        bconf.add_var(k, val)
+        val = bconf.var_value(k)
+        print("var_value({})={}".format(k, val))
+    return 0
+
 #
 # Main script
 #
@@ -80,6 +104,7 @@ if __name__ == "__main__":
 Test names are:
      a        Basic tests
      b        Show 'MEDIA' env. var
+     c        Show env. variables (if no param, show: HOME, ONEDRIVE)
 """)
         CODE = 0
     else:

@@ -53,6 +53,11 @@ class ConfHome():
         value = self._vars[name]
         return value
 
+    def get_gen_vars(self):
+        alist = list(self._genVar.keys())
+        alist.sort()
+        return alist
+
     def get_gen_var(self, a_key):
         return self._genVar.get(a_key)
 
@@ -77,7 +82,7 @@ class ConfHome():
         """
         Hashes to generic var (at '_genVar')
         :param dicts:
-        :param words:
+        :param words: list, env. var list
         :return: the list of 'keys' stored
         """
         def key_value(s):
@@ -94,7 +99,11 @@ class ConfHome():
             match_keys = words
             assert isinstance(words, (list, tuple))
         if dicts is None:
-            ds = (os.environ,)
+            dict_copy = deepcopy(os.environ)
+            if os.name == "nt":
+                if "HOME" not in dict_copy:
+                    dict_copy["HOME"] = dict_copy["USERPROFILE"]
+            ds = (dict_copy,)
         elif isinstance(dicts, (list, tuple)):
             ds = dicts
         for a_dict in ds:
