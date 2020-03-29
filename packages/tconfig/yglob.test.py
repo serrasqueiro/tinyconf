@@ -39,12 +39,34 @@ def test_yglob(outFile, errFile, inArgs):
     cmd = args[0]
     param = args[1:]
     print("Test {}: {}".format(cmd, param))
+    if cmd == "a":
+        code = test_a(bConfig, param)
+    elif cmd == "b":
+        code = test_b(bConfig, param)
+    else:
+        code = None
+    return code
+
+
+def test_a(bconf, param):
+    assert bconf is not None
     for a in param:
         dl = DirList(a)
         listed = dl.folders + dl.entries
         print("{} (#{}):\n{}".format(a, len(listed), yglob.tense_list(listed, "\t")))
     return 0
 
+
+def test_b(bconf, param):
+    assert bconf is not None
+    assert param == []
+    vname = "MEDIA"
+    val = bconf.get_gen_var(vname)
+    if val is None:
+        print("Does not exist:", vname)
+        return 2
+    print("get_gen_var({})={}".format(vname, val))
+    return 0
 
 
 #
@@ -57,6 +79,7 @@ if __name__ == "__main__":
 
 Test names are:
      a        Basic tests
+     b        Show 'MEDIA' env. var
 """)
         CODE = 0
     else:
