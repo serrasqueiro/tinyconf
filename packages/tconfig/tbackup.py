@@ -8,11 +8,11 @@ Module for handling short backups.
 # pylint: disable=bad-whitespace, chained-comparison
 
 import os
-import commands
-from commands import safe_name
-from confreader import bConfig, sorted_dict
-import yglob
-import archs.packs as ap
+import tconfig.commands as commands
+from tconfig.commands import safe_name
+from tconfig.confreader import bConfig, sorted_dict
+import tconfig.yglob as yglob
+import tconfig.archs.packs as ap
 
 
 

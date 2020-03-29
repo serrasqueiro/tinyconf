@@ -7,7 +7,10 @@ Module for handling direntry/ directories.
 # pylint: disable=missing-function-docstring, invalid-name, no-self-use
 
 import os
-from os import scandir
+try:
+    from os import scandir
+except ImportError:
+    print("Older python versions do not have 'scandir'; use listdir instead!")
 
 
 class DirList():

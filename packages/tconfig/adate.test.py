@@ -6,7 +6,7 @@
   Compatibility: python 2 and 3.
 """
 
-from adate import aDateMaster, CalDate, ShortDate
+from tconfig.adate import aDateMaster, CalDate, ShortDate
 
 # pylint: disable=missing-function-docstring, invalid-name
 

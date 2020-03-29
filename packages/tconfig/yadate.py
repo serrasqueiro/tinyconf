@@ -4,22 +4,37 @@ Yet another Date module!
 (c)2020  Henrique Moreira (part of 'tconfig')
 """
 
-# pylint: disable=missing-function-docstring, invalid-name, chained-comparison, no-self-use
+# pylint: disable=missing-docstring, invalid-name, chained-comparison, no-self-use
 
+import sys
 import copy
 import datetime
 
 
-def run_tests():
+def run_tests(ver_num):
+    """
+    Run basic tests.
+    """
+    DATE_TUP = (2020, 1, 19, 12, 58, 59)
+    dttm = datetime.datetime(*DATE_TUP)
     xDate = GenFDate("now")
-    yDate = GenFDate((2020, 1, 19, 12, 58, 59))
+    yDate = GenFDate(DATE_TUP)
     zDate = GenFDate()
     zDate.dup(yDate)
     t = str(yDate)
-    assert f"{yDate}" == f"{zDate}"
+    is_ok = "{}".format(yDate) == "{}".format(zDate)
+    ###  is_ok = f"{yDate}" == f"{zDate}"
+    assert is_ok
     s = "GenFDate('now')={}, yDate={}".format(xDate, yDate)
     print("Message", s)
-    w = xDate.get_iso_date("2020-01-19 12:58:59")
+    w2 = xDate.get_iso_date(int( dttm.timestamp() ))
+    try:
+        w = xDate.get_iso_date("2020-01-19 12:58:59")
+    except AttributeError:
+        w = None
+    if w is None:
+        w = w2
+        print("Low version?", ver_num, "; w:", w)
     w_int = int(w.timestamp())
     other_w = xDate.get_iso_date(w_int)
     print("ISO date: {} = {}".format(w, other_w))
@@ -177,4 +192,4 @@ if __name__ == "__main__":
 
 Follow basic tests.
 """)
-    run_tests()
+    run_tests(sys.version_info.major * 100 + sys.version_info.minor)

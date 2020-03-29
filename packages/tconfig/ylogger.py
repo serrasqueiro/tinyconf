@@ -8,7 +8,7 @@ Yet another Logger module!
 
 from sys import stdout
 import os
-import yadate
+import tconfig.yadate as yadate
 
 
 def run_test (param):

@@ -7,7 +7,7 @@ Module that handles file packs, such as zip-files.
 # pylint: disable=missing-function-docstring, attribute-defined-outside-init, invalid-name
 
 from zipfile import ZipFile
-import yadate
+import tconfig.yadate as yadate
 
 
 class GenFile():

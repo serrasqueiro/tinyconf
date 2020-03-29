@@ -4,7 +4,7 @@ Module for testing confreader.py
 (c)2020  Henrique Moreira (part of 'tconfig')
 """
 
-from confreader import bConfig, sorted_dict
+from tconfig.confreader import bConfig, sorted_dict
 
 # pylint: disable=missing-function-docstring, invalid-name
 

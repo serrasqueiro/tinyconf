@@ -6,17 +6,25 @@ Module for testing yglob.py
 
 # pylint: disable=missing-function-docstring, invalid-name
 
-import yglob
-from archs.dirs import DirList
-from confreader import bConfig
+import sys
+from sys import stdout, stderr, argv
 
-#
-# test_yglob()
-#
+import tconfig.yglob as yglob
+from tconfig.archs.dirs import DirList
+from tconfig.confreader import bConfig
+
+
 def test_yglob(outFile, errFile, inArgs):
+    """
+    Main test of yglob module!
+    """
     assert outFile is not None
     assert errFile is not None
-    bConfig.hash_generic_var(words=("HOME", "MEDIA", "HOMEDRIVE"))
+    ks = bConfig.hash_generic_var(words=("HOME", "MEDIA", "HOMEDRIVE"))
+    for k in ks:
+        val = bConfig.get_gen_var(k)
+        print("key={}, val={}".format(k, val))
+    print("---")
     if inArgs == []:
         media_dir = bConfig.get_gen_var("MEDIA")
         if media_dir is None:
@@ -43,8 +51,6 @@ def test_yglob(outFile, errFile, inArgs):
 # Main script
 #
 if __name__ == "__main__":
-    import sys
-    from sys import stdout, stderr, argv
     CODE = test_yglob(stdout, stderr, argv[1:])
     if CODE is None:
         print("""yglob.test.py test-name [options...]

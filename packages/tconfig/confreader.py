@@ -6,13 +6,20 @@ Module for reading configuration files.
 
 import os
 from copy import deepcopy
-import yglob
-from yglob import which_drive_letter, gen_pathname
+import tconfig.yglob as yglob
+from tconfig.yglob import which_drive_letter, gen_pathname
 
 # pylint: disable=missing-function-docstring, unused-argument, invalid-name, no-self-use, attribute-defined-outside-init
 
 
 class ConfHome():
+    lastPath = None
+    homeDir = None
+    homeDirRewrite = ""
+    basicEncoding = None
+    sepMultipleValue = ""
+    _vars = None
+
     """
     Abstract class ConfHome
     Home Configuration abstract class
