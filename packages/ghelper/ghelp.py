@@ -7,8 +7,8 @@ Author: Henrique Moreira, h@serrasqueiro.com
 # pylint: disable=missing-docstring, no-else-return, invalid-name
 
 import sys
-import pgit
-from pgit import GRepo
+import ghelper.pgit as pgit
+from ghelper.pgit import GRepo
 
 
 def main(args):
