@@ -201,6 +201,19 @@ class URI():
         return default
 
 
+def split_domain(s):
+    assert isinstance(s, str)
+    pre = ""
+    post = ""
+    pos = s.find("/")
+    if pos == -1:
+        pre = s
+    else:
+        pre = s[:pos]
+        post = s[pos+1:]
+    return (pre, post)
+
+
 if __name__ == "__main__":
     print("Import this module; follow a few tests.")
     tests()
