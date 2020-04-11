@@ -7,6 +7,7 @@ Author: Henrique Moreira, h@serrasqueiro.com
 # pylint: disable=missing-docstring, no-else-return, invalid-name
 
 import sys
+import os
 import ghelper.pgit as pgit
 from ghelper.pgit import GRepo
 
@@ -42,6 +43,8 @@ def run_main(cmd, args):
     #debug = 1
     debug = 0
     param = args
+    opts = {"dry-run": False,
+            }
     if cmd == "list":
         where = param[0]
         del param[0]
@@ -49,12 +52,15 @@ def run_main(cmd, args):
         code, _ = run_list(out_file, err_file, rp, param, debug=debug)
         return code
     elif cmd == "touch":
+        if param[0] == "--dry-run":
+            opts["dry-run"] = True
+            del param[0]
         where = param[0]
         del param[0]
         rp = GRepo(where, name)
         code, queue = run_list(None, err_file, rp, param, debug=debug)
         if code == 0:
-            run_touch(out_file, err_file, rp, queue)
+            run_touch(out_file, err_file, rp, queue, opts)
         return code
     elif cmd == "detail":
         where = param[0]
@@ -106,7 +112,8 @@ def run_list(out_file, err_file, rp, param, debug=0):
     return 0, queue
 
 
-def run_touch(out_file, err_file, rp, queue, debug=0):
+def run_touch(out_file, err_file, rp, queue, opts, debug=0):
+    dry_run = opts["dry-run"]
     wide = pgit.ISO_DATE_LEN
     my_path = pgit.get_realpath(pgit.working_dir())
     if my_path != rp.working_dir:
@@ -124,6 +131,7 @@ def run_touch(out_file, err_file, rp, queue, debug=0):
             err_file.write("Skipped, wrong name: {}\n".format(fname))
         elif pgit.is_file(fname):
             out_file.write('touch -d "{}" "{}"\n'.format(adate, fname))
+            touch_file(fname, adate, q, dry_run=dry_run)
         else:
             fails += 1
             err_file.write("Skipped, cannot find: {}\n".format(fname))
@@ -161,6 +169,23 @@ def run_detail(err_file, rp, param, debug=0):
             print("REF: '{}' = '{}', {}={}"
                   "".format(ref, adate, stamp, epoch_stamp))
     return 0
+
+
+def touch_file(fname, adate, q=None, dry_run=False, debug=0):
+    if debug > 0:
+        print("q is: '{}'; dry_run? {};\nadate='{}', fname='{}'"
+              "".format(q, dry_run, adate, fname))
+    cur_stamp = int(os.path.getmtime(fname))
+    ask_stamp = int(pgit.from_iso_date(adate).timestamp())
+    u_time = (ask_stamp, ask_stamp)
+    if debug > 0:
+        diff = ask_stamp - cur_stamp
+        print("Current stamp: {}, asked stamp: {}, diff: {}s (days: {:.3f})"
+              "".format(cur_stamp, ask_stamp, diff, diff / 86400.0))
+        print("")
+    if not dry_run:
+        os.utime(fname, u_time)
+    return True
 
 
 #

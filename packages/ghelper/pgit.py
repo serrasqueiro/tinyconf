@@ -71,10 +71,17 @@ def set_working_dir(path):
 
 def from_comma_date(s, time_sep=","):
     #strptime("2020-04-06T21:39:58Z", "%Y-%m-%dT%H:%M:%SZ")
+    in_str = "%Y-%m-%d{}%H:%M:%S".format(time_sep)
     if isinstance(s, str):
-        dttm = datetime.datetime.strptime(s, "%Y-%m-%d,%H:%M:%S")
+        dttm = datetime.datetime.strptime(s, in_str)
     else:
         dttm = None
+    return dttm
+
+
+def from_iso_date(s):
+    dttm = from_comma_date(s, " ")
+    assert dttm is not None
     return dttm
 
 
