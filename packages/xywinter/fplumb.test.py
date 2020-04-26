@@ -1,23 +1,36 @@
 #-*- coding: utf-8 -*-
-# fdperm.test.py  (c)2020  Henrique Moreira
+# fplumb.test.py  (c)2020  Henrique Moreira
 
 """
 Tests fdperm.py
 """
 
-# pylint: disable=line-too-long
+# pylint: disable=unused-argument
 
 import sys
-from xywinter.fdperm import FDPerm
+from xywinter.fplumb import FPlumb, local_easy_path
+try:
+    from xywinter.fplumb_locals import easy_path
+except ModuleNotFoundError:
+    easy_path = local_easy_path
 
 
 def main():
     """ Main basic tests! """
     args, code = sys.argv[1:], 0
-    for p in args:
-        fd = FDPerm(p)
+    for q in args:
+        p = easy_path(q.replace("\\", "/"))
+        fd = FPlumb(p)
+        s_aux = fd.set_linear()
+        assert s_aux == fd._path
+        assert s_aux == fd.get()
+        if p != s_aux:
+            print("Simplified path (proto is: {}): {}"
+                  "".format(fd.what_proto() if fd.what_proto() else "(nada)", s_aux))
         is_ok = fd.can_access()
         if not is_ok:
+            stair = fd.dig()
+            print("stair:\n\t{}\nLast accessible: {}".format(stair, stair[-1][0]))
             print("Not found:", fd)
             code = 1
             continue
@@ -40,28 +53,6 @@ def main():
 def short_bool(b):
     """ Short boolean string from bool """
     return "T" if b else "F"
-
-
-
-# Adapted from:	https://stackoverflow.com/questions/17809386/how-to-convert-a-stat-output-to-a-unix-permissions-string
-#
-#	def perm_to_unix_name(st_mode):
-#	    permstr = ''
-#	    usertypes = ['USR', 'GRP', 'OTH']
-#	    for usertype in usertypes:
-#	        perm_types = ['R', 'W', 'X']
-#	        for permtype in perm_types:
-#	            s = "S_I{}{}".format(permtype, usertype)
-#	            perm = getattr(stat, s)
-#	            if st_mode & perm:
-#	                permstr += permtype.lower()
-#	            else:
-#	                permstr += '-'
-#	    return permstr
-#	import stat; print("00754 is:", perm_to_unix_name(0o754))
-#
-#	... S_IRUSR, S_IWUSR, S_IXUSR, S_IRGRP, S_IWGRP, S_IXGRP, S_IROTH, S_IWOTH, S_IXOTH
-
 
 
 # Main script
