@@ -39,25 +39,34 @@ class FPlumb(FDPerm):
         Digs to the access and returns the access in the several sub-path(s).
         :return: list
         """
-        if self._is_root or self._path == "/":
+        path = self._path
+        if self._is_root or path == "/":
             return [("/", int(self.can_access()))]
-        parts = self._path.split("/")
+        if path == "":
+            return [("@empty", -1)]
+        is_slash = path[0] == "/"
+        parts = path[int(is_slash):].split("/")
         for part in parts:
             if part == "":
-                return [("@empty", -1)]
-            if part.startswith(".") or part.endswith("."):
+                return [("@empty", -2)]
+            if part in (".", "..") or part.endswith("."):
                 return [(part, -1)]
-        s, stair, res = "", [], []
+        s = "" if not is_slash else "/"
+        stair, res, first = [], [], True
         for part in parts:
             if part == "":
                 break
-            if s != "":
+            if not first:
                 s += "/"
             s += part
             stair.insert(0, s)
+            first = False
         for part in stair:
             # Example: os.access("/home/henrique/.bashrc", os.F_OK) is True
             is_ok = os.access(part, fdperm._CAN_ACCESS)
+            if is_ok:
+                if os.name != "nt" and os.path.isdir(part):
+                    is_ok = os.access(part, fdperm._CAN_EXECUTE)
             access_val = int(is_ok)
             res.append( (part, access_val) )
             if is_ok and break_when_ok:
