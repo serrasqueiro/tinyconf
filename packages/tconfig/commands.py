@@ -13,6 +13,24 @@ import subprocess
 # pylint: disable=missing-function-docstring, invalid-name
 
 
+def run_once (cmd, out_file=sys.stdout, show_cmd=False):
+    """
+    Run system command (popen)
+    :param cmd: command
+    :param out_file: output stream (or None)
+    :param show_cmd: show command while running
+    :param auto_subst: automatic substitution for Windows/ Linux commands
+    :return: list, text lines
+    """
+    if isinstance(cmd, str):
+        res = run_cmd(cmd, out_file, show_cmd)
+        return res
+    if isinstance(cmd, (list, tuple)):
+        s = " ".join(cmd)
+    res = run_cmd(s, out_file, show_cmd, auto_subst=False)
+    return res
+
+
 def run_cmd (cmd, out_file=sys.stdout, show_cmd=False, auto_subst=True):
     """
     Run system command (popen)
