@@ -24,13 +24,17 @@ class DirList():
     Directory listing
     """
     _path, _did_can = None, False
-    _mask = _ADD_DOT_FOLDER | _ADD_DOT_FILE
+    _mask = 0
     entries, folders, all = [], [], []
 
-    def __init__(self, path=None):
+    def __init__(self, path=None, mask=None):
         self._path = path
         self.entries, self.folders, self.all = [], [], []
         self._did_scan = path is not None
+        if mask is None:
+            self._mask = _ADD_DOT_FOLDER | _ADD_DOT_FILE
+        else:
+            assert isinstance(self._mask, int)
         if path:
             self._init_from_path(path)
 
@@ -39,6 +43,9 @@ class DirList():
 
     def is_ok(self):
         return self._did_scan
+
+    def ignore_dot_files(self):
+        self._mask = 0
 
     def get_dir(self, path=None):
         if path is None:
@@ -102,11 +109,12 @@ class DirList():
         entries = []
         for entry in ls:
             s = entry.name
+            assert s
             if entry.is_dir():
-                if self._mask & _ADD_DOT_FOLDER:
+                if (self._mask & _ADD_DOT_FOLDER) or not s.startswith("."):
                     folders.append(s)
             else:
-                if self._mask & _ADD_DOT_FILE:
+                if (self._mask & _ADD_DOT_FILE) or not s.startswith("."):
                     lst.append(s)
             entries.append(entry)
         return (lst, folders, entries)
