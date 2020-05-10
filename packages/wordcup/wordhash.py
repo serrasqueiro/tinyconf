@@ -5,90 +5,85 @@
 Checks words hashes
 """
 
-# pylint: disable=line-too-long
+# pylint: disable=no-self-use, invalid-name
 
-import sys
 from xywinter.lehash import calc_p_hash
 
 _FIRST_PRIME_1000 = 1009
 
 
-def main():
-    """ Main basic tests! """
-    code = basic_tests(sys.stdout, sys.argv[1:])
-    sys.exit(code)
-
-
-def basic_tests(out_file, args):
-    """ Basic tests """
-    verbose = 0
-    param = args
-    if param == []:
-        words = ("abas", "bola", "zona",)
-    else:
-        opts = param[0]
-        if opts.startswith("-v"):
-            del param[0]
-            verbose += int(opts.count("v"))
-        f_name = param[0]
-        words = simpler_text(open(f_name, "r").read()).split("\n")
-    wh = Wash()
-    show_words(out_file, wh, words)
-    nk, hs = 0, wh.histogram()
-    nums = list(hs.keys())
-    nums.sort()
-    for h in nums:
-        if h not in hs:
-            print("No key ({}): {}".format(h))
-            nk += 1
-    code = nk != 0
-    if verbose > 0:
-        for h in nums:
-            print("Key {}: {}".format(h, hs[h]))
-    return code
-
-
-def show_words(out_file, wh, words):
-    for word in words:
-        if word:
-            h = wh.calc(word)
-            out_file.write("{} = {}\n".format(wh.small_dec(h), word))
-    return 0
-
-
 class AnyHash():
     """ Any hash string, abstract class """
     s = ""
-    _histog = dict()
+    hash_function = calc_p_hash
+    _hashog = None
 
-    def _add_dict(self, a_hash):
+    def hashogram(self, do_sort=True):
+        """ Each element of the hash contains a list of words for that key.
+        """
+        if do_sort:
+            self._resort()
+        return self._hashog
+
+    def _add_dict(self, a_hash, h_dict):
         assert isinstance(a_hash, int)
-        if a_hash in self._histog:
-            self._histog[a_hash].append(self.s)
+        if a_hash in h_dict:
+            h_dict[a_hash].append(self.s)
         else:
-            self._histog[a_hash] = [self.s]
+            h_dict[a_hash] = [self.s]
             return True
         return False
 
-    def histogram(self):
-        return self._histog
+    def _resort(self):
+        return False
 
 
 class Wash(AnyHash):
     """ Word hash """
     def __init__(self, s=""):
         self.s = s
+        self._hashog = dict()
+        self.hash_function = calculate_word_hash
 
     def small_dec(self, val):
+        """ String for a 3-digit decimal """
         return "" if val < 0 else "{:03d}".format(val)
 
     def calc(self, s=None):
+        """ Hash for word, calculation """
         if s is not None:
             self.s = s
-        h = calculate_word_hash(self.s)
-        self._add_dict(h)
+        h = self.hash_function(self.s)
+        self._add_dict(h, self._hashog)
         assert 0 <= h < 1000
         return h
+
+    def _resort(self):
+        for key in self._hashog:
+            a_list = self._hashog[key]
+            a_list.sort()
+            self._hashog[key] = a_list
+        return True
+
+
+class WorldDict(AnyHash):
+    """ World Dictionary, for statistical purposes.
+    """
+    hash_tup = dict()
+
+    def __init__(self):
+        self.s = None
+        self._hashog = dict()
+
+    def new_word(self, s, val, h_val):
+        """ Add a new word to the dictionary. """
+        is_ok = s not in self.hash_tup
+        self.hash_tup[s] = (val, h_val)
+        if val in self._hashog:
+            self._hashog[val].append(s)
+        else:
+            self._hashog[val] = [s]
+        return is_ok
 
 
 def calculate_word_hash(s):
@@ -97,22 +92,28 @@ def calculate_word_hash(s):
     assert isinstance(s, str)
     if s == "":
         return 0
-    a_hash = 1+calc_p_hash(s, a_mod=_FIRST_PRIME_1000)
+    a_hash = 1 + word_hash1000(s)
     if a_hash >= 1000:
-        h = ord(s[-1]) * 3  # up to 768
+        h_val = ord(s[-1]) * 3  # up to 768
     else:
-        h = a_hash
-    return h
+        h_val = a_hash
+    return h_val
 
 
-def simpler_text(s):
-    """ Simplifies text for words.
-    """
-    res = s.replace(" ", "@")
-    assert res.find("@") == -1
-    return res
+def word_hash1000(s=None):
+    """ Word hash, based on calc_p_hash() """
+    if s is None:
+        return _FIRST_PRIME_1000
+    h_val = calc_p_hash(s, a_mod=_FIRST_PRIME_1000)
+    return h_val
+
+
+def word_sort(a_list):
+    if isinstance(a_list, list):
+        a_list.sort()
+    return a_list
 
 
 # Main script
 if __name__ == "__main__":
-    main()
+    print("Module, to import!")
