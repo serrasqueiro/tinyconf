@@ -12,6 +12,7 @@ from wordcup.wordhash import AnyHash
 
 _WORD_KINDS = {
     "@": "Unsuited",
+    "@abbrev": "Abbreviation",
     "@interj": "Interjectons",  # ("Ahem, Oops", ...)
     "@m-noun": "Male noun",
     "@f-noun": "Female noun",

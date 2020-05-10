@@ -8,6 +8,7 @@ Checks words hashes
 # pylint: disable=no-self-use, invalid-name
 
 from xywinter.lehash import calc_p_hash
+from wordcup.envelopes import WEnvelop
 
 _FIRST_PRIME_1000 = 1009
 
@@ -71,11 +72,23 @@ class Wash(AnyHash):
 class WorldDict(AnyHash):
     """ World Dictionary, for statistical purposes.
     """
+    _mod_used = 0
     hash_tup = dict()
+    words = []
+    envelope = None
 
-    def __init__(self):
+    def __init__(self, a_mod=0):
+        self._mod_used = word_hash1000() if a_mod == 0 else a_mod
         self.s = None
         self._hashog = dict()
+        self.envelope = WEnvelop()
+
+    def __str__(self):
+        return self.envelope.fingerprint()
+
+    def modulus(self):
+        """ Returns the modulus used for the word dict. """
+        return self._mod_used
 
     def new_word(self, s, val, h_val):
         """ Add a new word to the dictionary. """
@@ -86,6 +99,10 @@ class WorldDict(AnyHash):
         else:
             self._hashog[val] = [s]
         return is_ok
+
+    def words_md5(self):
+        """ Calculates MD5 hash newly (and sorts words) """
+        return self.envelope.calc(self.words)
 
 
 def calculate_word_hash(s):
