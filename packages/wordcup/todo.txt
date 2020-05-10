@@ -1,0 +1,8 @@
+
+% py ../wordcup/wordhash.test.py -v /home_02/henrique/git_repos/anaceo/giro_std/libdelta/skelword/pt_word_4-2.0.text
+
+% py ../wordcup/wordhash.test.py -t /home_02/henrique/git_repos/anaceo/giro_std/libdelta/skelword/pt_word_4-2.0.text
+
+% py ../wordcup/wordhash.test.py -v -t /home_02/henrique/git_repos/anaceo/giro_std/libdelta/skelword/pt_word_34-2.0.txt
+% py ../wordcup/wordhash.test.py -vv -t /home_02/henrique/git_repos/anaceo/giro_std/libdelta/skelword/pt_word_34-2.0.txt > /mnt/tmp/a.txt
+
