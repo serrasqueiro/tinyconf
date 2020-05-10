@@ -5,10 +5,11 @@
 Tests wordhash.py module
 """
 
-# pylint: disable=global-statement, invalid-name
+# pylint: disable=global-statement, unused-argument, invalid-name
 
 import sys
-from wordhash import Wash, WorldDict, word_hash1000, word_sort
+from wordcup.wordhash import Wash, WorldDict, word_hash1000, word_sort
+from wordcup.wordrules import WordRules
 
 # Global world dictionary, for statistics:
 w_dict = WorldDict()
@@ -27,6 +28,8 @@ def basic_tests(out_file, args):
     """ Basic tests """
     verbose = 0
     param = args
+    w_list = []
+    w_rules = WordRules()
     wash = Wash()
     # Basic parameter check
     while param and param[0].startswith("-"):
@@ -45,7 +48,12 @@ def basic_tests(out_file, args):
         words = ("abas", "bola", "zona",)
     else:
         f_name = param[0]
-        words = simpler_text(open(f_name, "r").read())
+        del param[0]
+        w_list = param
+        debug = int(verbose >= 3)
+        words = simpler_text(open(f_name, "r").read(), w_rules, debug)
+        if debug > 0:
+            show_wordrules(w_rules)
     nk = run_words(out_file, wash, words, debug=verbose)
     code = 0 if nk == 0 else 1
     if verbose >= 2:
@@ -57,6 +65,9 @@ def basic_tests(out_file, args):
     if nk != 0:
         print("word_hash1000()={}, number of 'no keys': {} ({})"
               "".format(word_hash1000(), nk, ok_str(nk == 0)))
+    if w_list:
+        is_ok = dump_extra_words(w_dict, w_list, debug=verbose)
+        assert is_ok
     return code
 
 
@@ -123,6 +134,39 @@ def show_words(out_file, wash, words):
     return 0
 
 
+def show_wordrules(w_rules, debug=0):
+    """ Display which 'special' words got out. """
+    hs = w_rules.hashogram(do_sort=False)
+    keys = word_sort(hs)
+    for kind in keys:
+        words = hs[kind]
+        print("Kind rule '{}' = '{}': #{}, {}"
+              "".format(kind,
+                        w_rules.description(kind),
+                        len(words), words))
+    return True
+
+
+def dump_extra_words(wd, w_list, debug=0):
+    """ Dump extra words in arguments! """
+    all_ok = True
+    for word in w_list:
+        tup = wd.hash_tup.get(word)
+        is_ok = tup is not None
+        if not is_ok:
+            all_ok = False
+            tup = (0, "?")
+            if debug > 0:
+                print("Word not indexed:", word)
+        print("word {:<5} {} ; {} MOD {} = {}"
+              "".format(word, tup,
+                        tup[0], word_hash1000(),
+                        tup[0] % word_hash1000(),
+                        )
+              )
+    return all_ok
+
+
 def dump_world_dict(wd, show_all=False):
     """ Dump world dictionary, to see the original hash. """
     hs = wd.hashogram(do_sort=False)
@@ -136,7 +180,7 @@ def dump_world_dict(wd, show_all=False):
     return collisions
 
 
-def simpler_text(s, debug=0):
+def simpler_text(s, w_rules, debug=0):
     """ Simplifies text for words.
     """
     res = []
@@ -147,11 +191,15 @@ def simpler_text(s, debug=0):
             continue
         pos = word.find("@")
         if pos > 0:
-            info = word[pos+1:]
+            info = word[pos:]
             word = word[:pos]
             skip += 1
+            s_kind = w_rules.rule(info)
             if debug > 0:
                 print("Skipped ({}): {}, {}".format(skip, word, info if info else "-"))
+            assert s_kind is not None
+            is_ok = w_rules.new_item(info, word)
+            assert is_ok
         else:
             assert word.islower()
             res.append(word)

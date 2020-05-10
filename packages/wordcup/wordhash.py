@@ -37,6 +37,9 @@ class AnyHash():
     def _resort(self):
         return False
 
+    def _word_sort(self, a_list):
+        return word_sort(a_list)
+
 
 class Wash(AnyHash):
     """ Word hash """
@@ -60,8 +63,7 @@ class Wash(AnyHash):
 
     def _resort(self):
         for key in self._hashog:
-            a_list = self._hashog[key]
-            a_list.sort()
+            a_list = self._word_sort(self._hashog[key])
             self._hashog[key] = a_list
         return True
 
@@ -109,9 +111,18 @@ def word_hash1000(s=None):
 
 
 def word_sort(a_list):
+    """ Sort a list of 'words'.
+        This can be used for other things, if needed.
+    """
     if isinstance(a_list, list):
         a_list.sort()
-    return a_list
+        res = a_list
+    elif isinstance(a_list, dict):
+        res = word_sort(list(a_list.keys()))
+    else:
+        print("Type:", type(a_list))
+        assert False
+    return res
 
 
 # Main script
