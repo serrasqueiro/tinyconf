@@ -62,6 +62,6 @@ def md5_digest(s):
     return res
 
 
-# Main script
+# Module
 if __name__ == "__main__":
     print("Module, to import!")
