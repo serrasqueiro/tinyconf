@@ -9,8 +9,10 @@ Checks words hashes
 
 from xywinter.lehash import calc_p_hash
 from wordcup.envelopes import WEnvelop
+from wordcup.primes import is_prime, next_prime
 
-_FIRST_PRIME_1000 = 1009
+_ALPHABET_NUM = 1000
+_FIRST_PRIME_1000 = next_prime(_ALPHABET_NUM)  # 1009 (prime)
 
 
 class AnyHash():
@@ -145,3 +147,5 @@ def word_sort(a_list):
 # Main script
 if __name__ == "__main__":
     print("Module, to import!")
+    assert is_prime(_FIRST_PRIME_1000)
+    assert next_prime(_ALPHABET_NUM) == _FIRST_PRIME_1000
