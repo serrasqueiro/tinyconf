@@ -92,9 +92,14 @@ class WorldDict(AnyHash):
         """ Returns the modulus used for the word dict. """
         return self._mod_used
 
-    def new_word(self, s, val, h_val):
+    def new_word(self, s, val, h_val, debug=0):
         """ Add a new word to the dictionary. """
         is_ok = s not in self.hash_tup
+        if debug > 0:
+            print(f"Debug: new_word('{s}', {val}, {h_val}) = {is_ok}")
+            print(f"	_hashog[{val}]='{s}'")
+        if not is_ok:
+            return False
         self.hash_tup[s] = (val, h_val)
         if val in self._hashog:
             self._hashog[val].append(s)
