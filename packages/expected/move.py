@@ -22,18 +22,33 @@ def move_file(one, two, overwrite=True):
     else:
         assert False
     two_is_dir = os.path.isdir(two)
+    s_info = " (overwrite)" if overwrite else ""
     if len(source) > 1:
         if not two_is_dir:
             return (-1, "Invalid usage")
-        shutil.move(one, two)
+        for one in source:
+            shutil.move(one, two)
     else:
+        one = source[0]
+        dest = ""
         if os.path.isfile(two):
             is_ok = overwrite
-        else:
-            is_ok = True
+        elif os.path.isdir(two):
+            is_ok = os.path.isfile(one)
+            if not is_ok:
+                return (4, "Source is not a file")
+            base = os.path.basename(one)
+            dest = os.path.join(two, base)
+        if dest:
+            two = dest
+            exists = os.path.isfile(two)
+            is_ok = overwrite or not exists
         if not is_ok:
             return (3, "Destination exists")
-        shutil.move(one, two)
+        try:
+            shutil.move(one, two)
+        except shutil.Error:
+            return (3, f"Destination exists{s_info}: {two}")
     #FileNotFoundError
     return (0, "OK")
 
