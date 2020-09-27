@@ -20,7 +20,9 @@ Author: Henrique Moreira, h@serrasqueiro.com
 import sys
 import os
 
-_DEBUG_LEVEL = 1
+_DEBUG_LEVEL = 0
+# Uncomment the following line to see debug info:
+#_DEBUG_LEVEL = 1
 _NORMAL_EXIT_CODE = 0
 # Uncomment the following line for tests:
 _NORMAL_EXIT_CODE = 1
@@ -118,16 +120,20 @@ def run_hook(file_names, opts, debug=0):
     is_ok = py_hook.endswith(".py")
     if debug > 0:
         print("Running hook:", py_hook, "<"*6, "" if is_ok else "(uops)")
-        print("bases:", bases)
-    new_str = f"\ncalled(names, ({repo_path},))\n"
-    if is_ok:
-        with open(py_hook, "r") as f_handle:
-            data = f_handle.read().replace("\nmain()\n", new_str)
-            what = exec(f_handle.read())
-    else:
+    if not is_ok:
         return 8
-    print("Debug: what is", what)
-    return 0
+    at = os.path.dirname(os.path.dirname(py_hook))
+    sys.path.append(at)
+    import cvhooks.usercommit as usercommit
+    code = usercommit.called(
+        {"dir": base_dir[:-1],
+         "repo": repo_name,
+         "repo-path": repo_path},
+        names,
+        )
+    if debug > 0:
+        print(f"bases: {bases}\nusercommit.called() returned {code}: {names}")
+    return code != 0
 
 
 def user_hook_at(path_pre, bases) -> str:
