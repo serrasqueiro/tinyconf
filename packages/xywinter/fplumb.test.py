@@ -2,13 +2,15 @@
 # fplumb.test.py  (c)2020  Henrique Moreira
 
 """
-Tests fdperm.py
+Tests fplumb.py
 """
 
 # pylint: disable=unused-argument
 
 import sys
 from xywinter.fplumb import FPlumb, local_easy_path
+from xywinter.fdperm import short_bool
+
 try:
     from xywinter.fplumb_locals import easy_path
 except ModuleNotFoundError:
@@ -48,11 +50,6 @@ def main():
                         )
               )
     sys.exit(code)
-
-
-def short_bool(b):
-    """ Short boolean string from bool """
-    return "T" if b else "F"
 
 
 # Main script

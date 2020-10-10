@@ -114,6 +114,11 @@ class FDPerm(UxPerm):
         return self._path
 
 
+def short_bool(b):
+    """ Short boolean string from bool """
+    return "T" if b else "F"
+
+
 # Module, import me!
 if __name__ == "__main__":
     print("Import me: {}\n{}".format(__file__, __doc__))

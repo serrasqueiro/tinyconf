@@ -8,7 +8,7 @@ Tests fdperm.py
 # pylint: disable=line-too-long
 
 import sys
-from xywinter.fdperm import FDPerm
+from xywinter.fdperm import FDPerm, short_bool
 
 
 def main():
@@ -35,12 +35,6 @@ def main():
                         )
               )
     sys.exit(code)
-
-
-def short_bool(b):
-    """ Short boolean string from bool """
-    return "T" if b else "F"
-
 
 
 # Adapted from:	https://stackoverflow.com/questions/17809386/how-to-convert-a-stat-output-to-a-unix-permissions-string
