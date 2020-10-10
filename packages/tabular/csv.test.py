@@ -84,7 +84,6 @@ def show_content(out, cont, opts):
             r_line = f"{listed}"
             r_line = r_line[1:-1]
             out.write(f"{r_line}\n")
-            break
 
 
 # Main script
