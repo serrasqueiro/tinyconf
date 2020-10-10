@@ -9,85 +9,29 @@ Parse csv text files
 
 import sys
 
-
-def main():
-    """ Main script
-    """
-    code = main_script(sys.stdout, sys.stderr, sys.argv[1:])
-    if code is None:
-        print(f"""{__file__} command
-
-Commands are:
-    read          Reads csv
-""")
-
-
-def main_script(out, err, args):
-    """ Main tests """
-    opts = {"debug": 0,
-            "verbose": 0,
-            }
-    if not args:
-        return None
-    cmd = args[0]
-    param = args[1:]
-    while param and param[0].startswith("-"):
-        if param[0].startswith("-v"):
-            opts["verbose"] += param[0].count("v")
-            del param[0]
-            continue
-        return None
-    if cmd == "read":
-        for name in param:
-            cont = CSV(name, header=True)
-            cont.tidy()
-            cont.renumber()
-            show_content(out, cont, opts)
-        return 0
-    return None
-
-
-def show_content(out, cont, opts):
-    """ Show table content """
-    verbose = opts["verbose"]
-    if cont.headers:
-        there = [cont.separator().join(listed) for _, listed in cont.headers]
-        shown = "\n".join(there)
-        mark = "=" * len(there[0])
-        if verbose > 0:
-            print(f"{shown}\n{mark}")
-    for row in cont.rows:
-        n_line, listed = row
-        if verbose > 0:
-            out.write(f"#{n_line}: {listed}\n")
-        else:
-            r_line = f"{listed}"
-            r_line = r_line[1:-1]
-            out.write(f"{r_line}\n")
-
-
 class Tabular:
     """ Generic tabular class, for tables """
     _encoding = "UTF-8"
     _header = ""
     _num_line = 0
     _separator = ";"
+    _col_names = tuple()
     headers, rows = None, None
 
     def separator(self):
         return self._separator
 
+    def columns(self):
+        return self._col_names[0]
 
-class CSV (Tabular):
-    """ CSV-text input """
-    def __init__(self, path=None, header=True):
-        """ Constructor """
-        assert isinstance(header, bool)
-        self.rows = list()
-        self._header, self._num_line = "", 0
-        self._separator = ","
-        if path:
-            self._read_file(path, int(header))
+    def column_names(self):
+        return self._col_names[1]
+
+    def column_keys(self):
+        return self._col_names[2]
+
+    def column_key_names(self):
+        return self._col_names[3]
 
     def renumber(self, new_number=None) -> bool:
         """ Renumber rows """
@@ -114,6 +58,39 @@ class CSV (Tabular):
             to_del.append(idx)
         for a_del in to_del:
             del self.rows[a_del]
+        self._hash_columns()
+
+    def _hash_columns(self) -> bool:
+        """ Hash column names """
+        if not self.headers:
+            return False
+        idx = 0
+        num, first = self.headers[0]
+        column_names, keying, keys, key_names = first, [], dict(), []
+        for name in column_names:
+            idx += 1
+            key = uncolumn_name(name)
+            lo_key = key.lower()
+            if lo_key in keys:
+                return False
+            keys[lo_key] = idx
+            keying.append(key)
+            key_names.append(lo_key)
+        self._col_names = (column_names, keying, keys, key_names)
+        return True
+
+
+class CSV (Tabular):
+    """ CSV-text input """
+    def __init__(self, path=None, header=True):
+        """ Constructor """
+        assert isinstance(header, bool)
+        self._col_names = tuple()
+        self.rows = list()
+        self._header, self._num_line = "", 0
+        self._separator = ","
+        if path:
+            self._read_file(path, int(header))
 
     def _read_file(self, path, header_lines) -> int:
         """ Read file """
@@ -184,6 +161,20 @@ def is_empty(obj) -> bool:
     return not obj
 
 
+def uncolumn_name(a_str) -> str:
+    u_str = a_str.strip()
+    while True:
+        new_str = u_str
+        u_str = new_str.replace("  ", " ")  # single blank, please
+        if u_str == new_str:
+            break
+    u_str = u_str.replace(" ", "_"). \
+        replace("(", ""). \
+        replace(")", ""). \
+        replace("/", "_")
+    return u_str
+
+
 # Main script
 if __name__ == "__main__":
-    main()
+    print("Import tabular.csv !")
