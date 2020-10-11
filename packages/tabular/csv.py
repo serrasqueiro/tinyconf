@@ -5,9 +5,7 @@
 Parse csv text files
 """
 
-# pylint: disable=no-self-use
-
-import sys
+# pylint: disable=no-self-use, missing-function-docstring
 
 class Tabular:
     """ Generic tabular class, for tables """
@@ -16,7 +14,7 @@ class Tabular:
     _num_line = 0
     _separator = ";"
     _col_names = tuple()
-    headers, rows = None, None
+    headers, rows = [], []
 
     def separator(self):
         return self._separator
@@ -35,19 +33,19 @@ class Tabular:
 
     def renumber(self, new_number=None) -> bool:
         """ Renumber rows """
-        if new_number == None:
+        if new_number is None:
             new = -len(self.headers)
         else:
             new = int(new_number)
         if not new:
             return False
         idx = 0
-        for row in self.rows:
+        while idx < len(self.rows):
             self.rows[idx][0] += new
             idx += 1
         return True
 
-    def tidy(self):
+    def tidy(self, debug=0) -> bool:
         """ Tidy table """
         # Removes last empty lines
         to_del, idx = [], len(self.rows)
@@ -58,14 +56,17 @@ class Tabular:
             to_del.append(idx)
         for a_del in to_del:
             del self.rows[a_del]
-        self._hash_columns()
+        is_ok = self._hash_columns()
+        if debug > 0:
+            print("tidy():", is_ok, "to_del:", to_del)
+        return is_ok
 
     def _hash_columns(self) -> bool:
         """ Hash column names """
         if not self.headers:
             return False
         idx = 0
-        num, first = self.headers[0]
+        _, first = self.headers[0]
         column_names, keying, keys, key_names = first, [], dict(), []
         for name in column_names:
             idx += 1
