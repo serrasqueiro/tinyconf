@@ -10,6 +10,8 @@ Test csv.py
 import sys
 from tabular.csv import CSV
 
+_MY_DECODER = "best-latin"
+
 
 def main():
     """ Main script
@@ -25,8 +27,11 @@ Commands are:
 
 def main_script(out, err, args):
     """ Main tests """
+    # pylint: disable=unused-argument
+
     opts = {"debug": 0,
             "verbose": 0,
+            "enc": _MY_DECODER,
             }
     if not args:
         return None
@@ -41,14 +46,14 @@ def main_script(out, err, args):
     assert opts["verbose"] <= 3
     if cmd == "read":
         for name in param:
-            cont = CSV(name, header=True)
+            cont = CSV(name, header=True, normal_encoding=opts["enc"])
             cont.tidy()
             cont.renumber()
             show_content(out, cont, opts)
         return 0
     if cmd == "header":
         for name in param:
-            cont = CSV(name, normal_encoding="best-latin")
+            cont = CSV(name, normal_encoding=opts["enc"])
             cont.tidy()
             print("columns():", cont.columns())
             print("column_names():", cont.column_names())

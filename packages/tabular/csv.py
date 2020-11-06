@@ -10,7 +10,15 @@ Parse csv text files
 _EXCEPT_ENCODINGS = ("best-latin",
                      )
 
-class Tabular:
+class GenHandle:
+    """ Generic handle, with errors """
+    _error = 0
+
+    def is_ok(self) -> bool:
+        return self._error == 0
+
+
+class Tabular(GenHandle):
     """ Generic tabular class, for tables """
     _encoding, _enc_try = "UTF-8", ""
     _header = ""
@@ -86,6 +94,8 @@ class Tabular:
 
 class CSV (Tabular):
     """ CSV-text input """
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self, path=None, header=True, normal_encoding=""):
         """ Constructor """
         assert isinstance(header, bool)
@@ -93,24 +103,31 @@ class CSV (Tabular):
         self.rows = list()
         self._header, self._num_line = "", 0
         self._separator = ","
-        if normal_encoding in _EXCEPT_ENCODINGS:
+        if not normal_encoding or normal_encoding in _EXCEPT_ENCODINGS:
             encoder = "UTF-8"
         else:
             encoder = normal_encoding
         self._encoding, self._enc_try = encoder, normal_encoding
         if path:
-            self._read_file(path, int(header))
+            code = self._read_file(path, int(header))
+        else:
+            code = 0
+        self._error = code
 
     def _read_file(self, path, header_lines) -> int:
         """ Read file """
         encoding = self._encoding
-        try:
-            data = open(path, "r", encoding=encoding).read()
-        except UnicodeDecodeError:
-            data = None
-        if data is None:
-            if self._enc_try == "best-latin":
+        if self._enc_try == "best-latin":
+            try:
                 data = open(path, "r", encoding="ISO-8859-1").read()
+            except UnicodeDecodeError:
+                data = None
+        #print(f"_read_file {path}: header_lines={header_lines}, decode: {encoding} (try: '{self._enc_try})' data?", data is not None)
+        if data is None:
+            try:
+                data = open(path, "r", encoding=encoding).read()
+            except UnicodeDecodeError:
+                return 101
         self._add_data(data, header_lines)
         return 0
 
