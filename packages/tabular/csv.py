@@ -7,9 +7,12 @@ Parse csv text files
 
 # pylint: disable=no-self-use, missing-function-docstring
 
+_EXCEPT_ENCODINGS = ("best-latin",
+                     )
+
 class Tabular:
     """ Generic tabular class, for tables """
-    _encoding = "UTF-8"
+    _encoding, _enc_try = "UTF-8", ""
     _header = ""
     _num_line = 0
     _separator = ";"
@@ -83,20 +86,31 @@ class Tabular:
 
 class CSV (Tabular):
     """ CSV-text input """
-    def __init__(self, path=None, header=True):
+    def __init__(self, path=None, header=True, normal_encoding=""):
         """ Constructor """
         assert isinstance(header, bool)
         self._col_names = tuple()
         self.rows = list()
         self._header, self._num_line = "", 0
         self._separator = ","
+        if normal_encoding in _EXCEPT_ENCODINGS:
+            encoder = "UTF-8"
+        else:
+            encoder = normal_encoding
+        self._encoding, self._enc_try = encoder, normal_encoding
         if path:
             self._read_file(path, int(header))
 
     def _read_file(self, path, header_lines) -> int:
         """ Read file """
         encoding = self._encoding
-        data = open(path, "r", encoding=encoding).read()
+        try:
+            data = open(path, "r", encoding=encoding).read()
+        except UnicodeDecodeError:
+            data = None
+        if data is None:
+            if self._enc_try == "best-latin":
+                data = open(path, "r", encoding="ISO-8859-1").read()
         self._add_data(data, header_lines)
         return 0
 

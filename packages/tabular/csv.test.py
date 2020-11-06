@@ -48,7 +48,7 @@ def main_script(out, err, args):
         return 0
     if cmd == "header":
         for name in param:
-            cont = CSV(name)
+            cont = CSV(name, normal_encoding="best-latin")
             cont.tidy()
             print("columns():", cont.columns())
             print("column_names():", cont.column_names())
