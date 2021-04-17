@@ -1,3 +1,4 @@
+# (c)2020, 2021  Henrique Moreira
 # inspired on https://docs.python.org/3.4/library/html.parser.html#htmlparser-methods
 
 from html.parser import HTMLParser
@@ -70,6 +71,3 @@ class MyHTMLParser_Simple(HTMLParser):
 
     def handle_data(self, data):
         print("Encountered some data  :", data)
-
-
-#main()
