@@ -1,0 +1,16 @@
+
+# SAVE this file, but do not publish it!
+	_fplumb_locals-linux.py
+
+%	ln -s _fplumb_locals-linux.py fplumb_locals.py
+
+
+Exists:
+% py fplumb.test.py @h:ini
+
+Does not exist:
+% py fplumb.test.py @ana:jpg
+
+
+py mounts.test.py cat /home_02/henrique/wpriv/investment/reinveste_com/priv_accoes
+
