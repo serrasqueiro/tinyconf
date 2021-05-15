@@ -11,16 +11,21 @@ import os
 import ghelper.pgit as pgit
 
 
-def run_list(out_file, err_file, rpl, param, debug=0):
+def run_list(out_file, err_file, rpl, opt_list:list, debug=0) -> tuple:
     """ List function. """
-    assert not param, "'param' expected empty!"
+    assert isinstance(opt_list, (list, tuple)), "'opt_list' should be a list!"
+    verbose, _ = opt_list
+    assert verbose >= 0, f"Invalid verbose level: {verbose}"
+    assert err_file, "'err_file' must not be empty!"
+    # Main func.
     _, refs = rpl.pretty_log()
-    bogus = list()
     if debug > 0:
         for ish, _, stamp in refs:
             print("Debug: ish, stamp =", ish, stamp)
+    bogus = list()
     last_datelist = list()
     dct, names = dict(), dict()
+    # The loops
     for fname in rpl.git.execute(["git", "ls-files"]).splitlines():
         assert fname, "Unexpected empty file name"
         names[fname] = ""
@@ -49,12 +54,23 @@ def run_list(out_file, err_file, rpl, param, debug=0):
                 print("Debug: first commit:", adate, fname)
             dct[fname] = adate
     queue = []
+    # Aux. vars.
+    idx, max_idx, med_idx = 0, len(dct), 10
+    if max_idx > 1000:
+        med_idx = 100
+    # One of the loops
     for fname in sorted(dct):
         adate = dct[fname].replace(",", " ")
         s = "{} {}".format(adate, fname)
         if len(adate) != pgit.ISO_DATE_LEN:
             bogus.append(adate)
         queue.append(s)
+        idx += 1
+        if verbose > 0:
+            if idx >= max_idx or max_idx < 100 or (idx % med_idx) == 0:
+                #s_msg = f"git progress: {idx}/{max_idx} (#files: {len(names)})\n"
+                s_msg = f"git progress: {idx}/{max_idx}\n"
+                err_file.write(s_msg)
     queue.sort(reverse=False)
     if out_file is not None:
         astr = "\n".join(queue)
