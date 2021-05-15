@@ -76,3 +76,15 @@ def c_mul(a, b):
 def largest_prime ():
     """ Largest unsigned 32bit prime """
     return 4294967291
+
+
+def is_prime(num) -> bool:
+    """Returns True if the number is prime, else False. """
+    assert isinstance(num, int)
+    assert num >= 0, f"Invalid is_prime() call: {num}"
+    if num in (0, 1):
+        return False
+    for x in range(2, num):
+        if num % x == 0:
+            return False
+    return True
