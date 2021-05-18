@@ -17,18 +17,22 @@ ISO_DATE_LEN = 19
 class GRepo(git.Repo):
     """ Git Repo """
     _MIN_SIZE = 30
-    repo_name = None
+    _repo_name = None
 
     def __init__(self, path="", name=None):
         super().__init__(path)
         # self.working_dir -- the working directory absolute path
+        self._repo_name = name
+
+    def named_as(self):
+        return self._repo_name
 
     def pretty_log(self, max_width=120):
         lines = self.git.log(
             "--pretty=%h: %ad %s", '--no-merges', '--date=format:%Y-%m-%d %H:%M:%S'
             ).splitlines()
-        idx = 0
         refs = []
+        idx = 0
         while idx < len(lines):
             s = lines[idx]
             # b86aae1: 2019-12-19 08:01:51 ...
@@ -37,7 +41,7 @@ class GRepo(git.Repo):
             ish, b = split_start(s, ": ")
             adate = ",".join(b.split(" ")[:2])
             stamp = from_comma_date(adate)
-            refs.append( (ish, adate, stamp) )
+            refs.append((ish, adate, stamp))
             idx += 1
         return (lines, refs)
 
