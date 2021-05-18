@@ -29,6 +29,7 @@ def run_list(out_file, err_file, rpl, opt_list:list, debug=0) -> tuple:
     for fname in rpl.git.execute(["git", "ls-files"]).splitlines():
         assert fname, "Unexpected empty file name"
         names[fname] = ""
+    idx, max_idx, med_idx = 0, len(refs), 10
     for ish, adate, stamp in refs:
         s = rpl.git.execute(["git", "diff-tree", "--no-commit-id", "--name-only", "-r", ish])
         change_list = s.splitlines()
@@ -44,6 +45,10 @@ def run_list(out_file, err_file, rpl, opt_list:list, debug=0) -> tuple:
                 if adate > dct[fname]:
                     dct[fname] = adate
             names[fname] = adate
+        if verbose > 0:
+            if (idx % med_idx) == 0 or idx >= max_idx:
+                err_file.write(f"Listing {idx}/{max_idx}\n")
+            idx += 1
     # The first commit: there is no diff-tree, so files are at that time!
     if last_datelist:
         adate = last_datelist[0]
