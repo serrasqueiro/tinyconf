@@ -28,11 +28,12 @@ def sample():
 	301
 	>>> data = resp.read()
     """
-    for url in (
+    urls_test = (
         "http://gist.github.com/31e19db1dba146e512e4ea39c2c76279.git",
         "https://gist.github.com/31e19db1dba146e512e4ea39c2c76279.git",
         #	... "https://meteo.pt/"
-        ):
+        )
+    for url in urls_test:
         print("Checking URL (redirection?) at:", url)
         getter = GistGetter(url)
         where = getter.to_where
@@ -62,6 +63,8 @@ class Getter():
         return self._headers[0]
 
     def content_type(self) -> str:
+        """ Returns the content-type, if detected by process_headers()
+        """
         if len(self._headers) < 2:
             return ""
         return self._headers[1]
@@ -100,6 +103,8 @@ class GistGetter(Getter):
         return self._req
 
     def process_headers(self) -> bool:
+        """ Pre-process headers, mainly to check the content-type.
+        """
         if not self._headers:
             return False
         if len(self._headers) >= 2:
