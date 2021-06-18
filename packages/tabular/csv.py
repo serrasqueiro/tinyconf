@@ -29,6 +29,9 @@ class Tabular(GenHandle):
     _col_names = tuple()
     headers, rows = [], []
 
+    def items(self):
+        return [item for _, item in self.rows]
+
     def separator(self):
         return self._separator
 
@@ -132,6 +135,9 @@ class CSV(Tabular):
                 data = open(path, "r", encoding=encoding).read()
             except UnicodeDecodeError:
                 return 101
+        if encoding == "UTF-8" and data:
+            if 0xfeff == ord(data[0]):
+                data = data[1:]
         self._add_data(data, header_lines)
         return 0
 
