@@ -7,8 +7,10 @@ Parse csv text files
 
 # pylint: disable=no-self-use, missing-function-docstring
 
-_EXCEPT_ENCODINGS = ("best-latin",
-                     )
+_EXCEPT_ENCODINGS = (
+    "best-latin",
+)
+
 
 class GenHandle:
     """ Generic handle, with errors """
@@ -92,7 +94,7 @@ class Tabular(GenHandle):
         return True
 
 
-class CSV (Tabular):
+class CSV(Tabular):
     """ CSV-text input """
     # pylint: disable=too-many-instance-attributes
 
@@ -116,7 +118,9 @@ class CSV (Tabular):
 
     def _read_file(self, path, header_lines) -> int:
         """ Read file """
+        # pylint: disable=line-too-long
         encoding = self._encoding
+        data = None
         if self._enc_try == "best-latin":
             try:
                 data = open(path, "r", encoding="ISO-8859-1").read()
@@ -162,21 +166,21 @@ class CSV (Tabular):
             return ""
 
         while idx < len(s_line):
-            ch = s_line[idx]
-            if ch == '"':
+            achr = s_line[idx]
+            if achr == '"':
                 if quoted:
                     quote = process_cell(quote, row)
                 quoted = int(quoted == 0)
             else:
                 if quoted:
-                    quote += ch
+                    quote += achr
                 else:
-                    if ch == self._separator:
+                    if achr == self._separator:
                         if last_ch != '"':
                             a_str = process_cell(a_str, row)
                     else:
-                        a_str += ch
-            last_ch = ch
+                        a_str += achr
+            last_ch = achr
             idx += 1
         if quoted:
             process_cell("?", row)
