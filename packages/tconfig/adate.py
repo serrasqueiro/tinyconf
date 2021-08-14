@@ -8,11 +8,9 @@
 
 import datetime
 # pylint: disable=invalid-name, pointless-string-statement, missing-function-docstring, no-self-use
-# pylint: disable=chained-comparison, attribute-defined-outside-init
+# pylint: disable=chained-comparison
+### attribute-defined-outside-init
 
-#
-# Abstract CLASS AnyDate
-#
 class AnyDate():
     """
     AnyDate abstract class
@@ -94,9 +92,6 @@ class AnyDate():
         return mjd2 - mjd1
 
 
-#
-# CLASS CalDate
-#
 class CalDate(AnyDate):
     """
     CalDate is a Calendar Date helper class
@@ -170,9 +165,6 @@ class CalDate(AnyDate):
         return self.to_string(year, month, day, isoFormat)
 
 
-#
-# CLASS ShortDate
-#
 class ShortDate(AnyDate):
     """
     ShortDate class helper
@@ -213,6 +205,36 @@ class ShortDate(AnyDate):
     def __str__(self):
         return self.to_str()
 
+    def __lt__(self, other):
+        """ Returns True if own date is lower than the 'other' date. """
+        date1 = aDateMaster.calc_MJD(self)
+        date2 = aDateMaster.calc_MJD(other)
+        return date1 < date2
+
+    def __gt__(self, other):
+        """ Returns True if own date is higher than the 'other' date. """
+        date1 = aDateMaster.calc_MJD(self)
+        date2 = aDateMaster.calc_MJD(other)
+        return date1 > date2
+
+    def __le__(self, other):
+        """ Returns True if own date is lower/equal than the 'other' date. """
+        date1 = aDateMaster.calc_MJD(self)
+        date2 = aDateMaster.calc_MJD(other)
+        return date1 <= date2
+
+    def __ge__(self, other):
+        """ Returns True if own date is higher/equal than the 'other' date. """
+        date1 = aDateMaster.calc_MJD(self)
+        date2 = aDateMaster.calc_MJD(other)
+        return date1 >= date2
+
+    def __eq__(self, other):
+        """ Returns True if own date is the same as 'other'. """
+        return self.match(other)
+
+    def match(self, sd):
+        return self.year == sd.year and self.month == sd.month and self.day == sd.day
 
     def valid_date(self):
         """
@@ -330,10 +352,6 @@ class ShortDate(AnyDate):
         self.day = t - int( 2447*u/80 )
         #print("from_MJD()", mjd, "is:", self.year, self.month, self.day)
         return True
-
-
-    def match(self, sd):
-        return self.year == sd.year and self.month == sd.month and self.day == sd.day
 
 
     def to_str(self, isoFormat="E8601DAw"):

@@ -6,14 +6,16 @@
   Compatibility: python 2 and 3.
 """
 
+import sys
 from tconfig.adate import aDateMaster, CalDate, ShortDate
 
 # pylint: disable=missing-function-docstring, invalid-name
 
+def main():
+    """ Run tests! """
+    assert test_adate(sys.argv[1:])
 
-#
-# test_adate()
-#
+
 def test_adate(args):
     """
     :param args: System arguments
@@ -84,20 +86,17 @@ def run_tests_adate(args, testLeapYears, testModifiedJulianDay):
     if testModifiedJulianDay:
         same = ShortDate()
         for mjd in [58391]:
-            isOk = same.from_MJD(mjd)
-            theSame = same.match(sd)
-            print("MJD", mjd, "is:", same, "=", sd, "OK" if theSame else "NotOk")
-            assert theSame
-            calcMJD = same.nys_date_to_MJD(2018, 9, 30)
-            print("calcMJD =", calcMJD)
+            isOk = mjd_tester(mjd, same, sd)
+            assert isOk
     if isOk:
         # Test simple string dates such as '2018-10-13', etc.
-        for aStr, expectedOk in [("2018-10-13", True),
-                                 ("2018-10-31", True),
-                                 ("2018-10-32", False),
-                                 ("2018-11-31", False),
-                                 ("2017-02-29", False),
-                                 ]:
+        for aStr, expectedOk in [
+            ("2018-10-13", True),
+            ("2018-10-31", True),
+            ("2018-10-32", False),
+            ("2018-11-31", False),
+            ("2017-02-29", False),
+            ]:
             sd = ShortDate(aStr)
             isOk = bool(sd.errorCode == 0) == expectedOk
             print("ShortDate() of", "'"+aStr+"'",
@@ -108,7 +107,7 @@ def run_tests_adate(args, testLeapYears, testModifiedJulianDay):
         assert not niceOk
         assert a == 0 and b == 0 and c == 0
     assert isOk
-    if args != []:
+    if args:
         isOk = test_with_args(args)
     else:
         isOk = remaining_tests()
@@ -155,10 +154,21 @@ def remaining_tests():
     return True
 
 
+def mjd_tester(mjd, same, sd):
+    is_ok = same.from_MJD(mjd)
+    theSame = same.match(sd)
+    print("MJD", mjd, "is:", same, "=", sd, "OK" if theSame else "NotOk")
+    assert theSame
+    assert same == sd
+    assert not (same != sd)
+    assert same >= sd
+    calcMJD = same.nys_date_to_MJD(2018, 9, 30)
+    print("calcMJD =", calcMJD)
+    assert calcMJD == mjd
+    return is_ok
+
 #
 # Test suite
 #
 if __name__ == "__main__":
-    import sys
-    ALL_OK = test_adate(sys.argv[1:])
-    assert ALL_OK
+    main()
