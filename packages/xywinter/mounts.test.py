@@ -27,7 +27,7 @@ Commands are:
     sys.exit(0 if code is None else code)
 
 
-def runner(out, err, args) -> int:
+def runner(out, err, args):
     """ Main run function """
     if not args:
         return None
