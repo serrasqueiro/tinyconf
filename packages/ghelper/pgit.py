@@ -1,16 +1,17 @@
 """
 Simple wrapper classes of git
 
-Author: Henrique Moreira, h@serrasqueiro.com
+Author: Henrique Moreira
 """
 
-# pylint: disable=missing-docstring, unused-argument
+# pylint: disable=missing-docstring, consider-using-f-string
 
 import os
 import datetime
 import git
 
 
+REPO_DEF_NAME = "AnyRepo"
 ISO_DATE_LEN = 19
 
 
@@ -21,43 +22,32 @@ class GRepo(git.Repo):
 
     def __init__(self, path="", name=None):
         super().__init__(path)
-        # self.working_dir -- the working directory absolute path
-        self._repo_name = name
+        self._repo_name = REPO_DEF_NAME if name is None else name
 
     def named_as(self):
         return self._repo_name
 
+    def my_dir(self):
+        """ Returns 'working_dir' -- the working directory absolute path. """
+        return self.working_dir
+
     def pretty_log(self, max_width=120):
         lines = self.git.log(
             "--pretty=%h: %ad %s", '--no-merges', '--date=format:%Y-%m-%d %H:%M:%S'
-            ).splitlines()
+        ).splitlines()
         refs = []
-        idx = 0
-        while idx < len(lines):
-            s = lines[idx]
+        for idx, s in enumerate(lines):
             # b86aae1: 2019-12-19 08:01:51 ...
             if max_width != -1 and len(s) > self._MIN_SIZE and len(s) > max_width:
                 lines[idx] = s[:max_width-2] + ".."
-            ish, b = split_start(s, ": ")
-            adate = ",".join(b.split(" ")[:2])
+            if ": " not in s:
+                continue
+            ish, bstr = s.split(": ", maxsplit=1)
+            assert bstr, s
+            adate = ",".join(bstr.split(" ")[:2])
             stamp = from_comma_date(adate)
             refs.append((ish, adate, stamp))
-            idx += 1
         return (lines, refs)
-
-
-def split_start(s, spl):
-    res = None
-    if isinstance(s, str):
-        pos = s.find(spl)
-        if pos != -1:
-            left = s[:pos]
-            right = s[pos+len(spl):]
-            return [left, right]
-        res = [s]
-    else:
-        assert False
-    return res
 
 
 def working_dir():
@@ -91,6 +81,9 @@ def from_iso_date(s):
 
 def is_file(s):
     return os.path.isfile(s)
+
+def is_dir(s):
+    return os.path.isdir(s)
 
 
 #

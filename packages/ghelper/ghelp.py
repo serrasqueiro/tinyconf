@@ -1,14 +1,13 @@
-
-# (c)2020  Henrique Moreira (h@serrasqueiro.com)
+# (c)2020, 2022  Henrique Moreira
 
 """
 git helper functions
 """
 
-# pylint: disable=unused-argument
+# pylint: disable=consider-using-f-string
 
 import os
-import ghelper.pgit as pgit
+from ghelper import pgit
 
 
 def run_list(out_file, err_file, rpl, opt_list:list, debug=0) -> tuple:
@@ -22,8 +21,8 @@ def run_list(out_file, err_file, rpl, opt_list:list, debug=0) -> tuple:
     if debug > 0:
         for ish, _, stamp in refs:
             print("Debug: ish, stamp =", ish, stamp)
-    bogus = list()
-    last_datelist = list()
+    bogus = []
+    last_datelist = []
     dct, names = dict(), dict()
     # The loops
     for fname in rpl.git.execute(["git", "ls-files"]).splitlines():
@@ -97,16 +96,20 @@ def run_touch(out_file, err_file, rpl, queue, opts, debug=0):
         print("cd {}".format(rpl.working_dir))
     pgit.set_working_dir(rpl.working_dir)
     fails = 0
-    for q in queue:
-        assert len(q) > wide + 2
-        adate = q[:wide]
-        fname = q[wide+1:]
+    for que in queue:
+        #print("QUE:", que)
+        assert len(que) > wide + 2, que
+        adate = que[:wide]
+        fname = que[wide+1:]
         if fname.find('"') > 0:
             fails += 1
             err_file.write("Skipped, wrong name: {}\n".format(fname))
         elif pgit.is_file(fname):
             out_file.write('touch -d "{}" "{}"\n'.format(adate, fname))
-            touch_file(fname, adate, q, dry_run=dry_run)
+            touch_file(fname, adate, que, dry_run=dry_run)
+        elif pgit.is_dir(fname):
+            #print("DIR:", fname)
+            touch_file(fname, adate, que, dry_run=dry_run)
         else:
             fails += 1
             err_file.write("Skipped, cannot find: {}\n".format(fname))
