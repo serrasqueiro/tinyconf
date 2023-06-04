@@ -1,4 +1,4 @@
-# hurricane.py  (c)2020  Henrique Moreira
+# hurricane.py  (c)2020, 2023  Henrique Moreira
 
 """
 List of Hurricanes and misc. data from NHC
@@ -16,8 +16,9 @@ List of Hurricanes and misc. data from NHC
 
 import sys
 
-_SAMPLES = (2020, 2021, 2022, 2023, 2024, 2025,
-            )
+_SAMPLES = (
+    2020, 2021, 2022, 2023, 2024, 2025,
+)
 
 ### Atlantic hurricane names!
 _NAMES_2020 = (
@@ -42,7 +43,7 @@ _NAMES_2020 = (
     "Teddy",
     "Vicky",
     "Wilfred",
-    )
+)
 
 _NAMES_2021 = (
     "Ana",
@@ -66,7 +67,7 @@ _NAMES_2021 = (
     "Teresa",
     "Victor",
     "Wanda",
-    )
+)
 
 _NAMES_2022 = (
     "Alex",
@@ -90,7 +91,7 @@ _NAMES_2022 = (
     "Tobias",
     "Virginie",
     "Walter",
-    )
+)
 
 _NAMES_2023 = (
     "Arlene",
@@ -114,7 +115,7 @@ _NAMES_2023 = (
     "Tammy",
     "Vince",
     "Whitney",
-    )
+)
 
 _NAMES_2024 = (
     "Alberto",
@@ -138,7 +139,7 @@ _NAMES_2024 = (
     "Tony",
     "Valerie",
     "William",
-    )
+)
 
 _NAMES_2025 = (
     "Andrea",
@@ -162,44 +163,47 @@ _NAMES_2025 = (
     "Tanya",
     "Van",
     "Wendy",
-    )
+)
 
-_SEQ_NAMES = ((2020,
-               ("@",
-                _NAMES_2020,
-                ),
-               ),
-              (2021,
-               ("@",
-                _NAMES_2021,
-                ),
-               ),
-              (2022,
-               ("@",
-                _NAMES_2022,
-                ),
-               ),
-              (2023,
-               ("@",
-                _NAMES_2023,
-                ),
-               ),
-              (2024,
-               ("@",
-                _NAMES_2024,
-                ),
-               ),
-              (2025,
-               ("@",
-                _NAMES_2025,
-                ),
-               ),
-              )
+_SEQ_NAMES = (
+    (2020,
+     ("@",
+      _NAMES_2020,
+      ),
+    ),
+    (2021,
+     ("@",
+      _NAMES_2021,
+      ),
+    ),
+    (2022,
+     ("@",
+      _NAMES_2022,
+      ),
+    ),
+    (2023,
+     ("@",
+      _NAMES_2023,
+      ),
+    ),
+    (2024,
+     ("@",
+      _NAMES_2024,
+      ),
+    ),
+    (2025,
+     ("@",
+      _NAMES_2025,
+      ),
+    ),
+)
 
-_GREEK_STORMS = ("Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Eta", "Theta",
-                 "Iota", "Kappa", "Lambda", "Mu", "Nu", "Xi", "Omicron", "Pi",
-                 "Rho", "Sigma", "Tau", "Upsilon", "Phi", "Chi", "Psi", "Omega",
-                 )
+_GREEK_STORMS = (
+    "Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Eta", "Theta",
+    "Iota", "Kappa", "Lambda", "Mu", "Nu", "Xi", "Omicron", "Pi",
+    "Rho", "Sigma", "Tau", "Upsilon", "Phi", "Chi", "Psi", "Omega",
+)
+
 # retired names: https://www.nhc.noaa.gov/aboutnames_history.shtml
 _RETIRED_HURRICANES = (
     (1972, "Agnes"),
@@ -291,7 +295,7 @@ _RETIRED_HURRICANES = (
     (2005, "Stan"),
     (2010, "Tomas"),
     (2005, "Wilma"),
-    )
+)
 
 
 def main():
@@ -310,7 +314,7 @@ a         List basic db.
 
 def run_main(out, err, args) -> int:
     """ Main runner """
-    param = list()
+    param = []
     if not args:
         letter = 'a'
     else:
@@ -323,15 +327,16 @@ def run_main(out, err, args) -> int:
         return run_b()
     if letter == 'c':
         return run_c(param)
-    assert not param
+    assert not param, "What?"
     code = run_a()
     return code
 
 
 def run_a() -> int:
     """ Basic list and check! """
-    idx = 0
-    for year, tup in _SEQ_NAMES:
+    for idx, pair in enumerate(_SEQ_NAMES):
+        year, tup = pair
+        print(":::", year, ":::", [tup])
         _, names = tup
         shown = ", ".join(names)
         listed = [name for name in names]
@@ -341,8 +346,7 @@ def run_a() -> int:
         print("")
         assert _SAMPLES[idx] == year
         assert listed == check
-        idx += 1
-    assert idx == 6
+    assert idx == 5, f"idx is: {idx}"
     return 0
 
 
