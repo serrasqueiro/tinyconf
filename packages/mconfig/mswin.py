@@ -1,7 +1,7 @@
-# mswin.py  (c)2020  Henrique Moreira (part of 'mconfig')
+# mswin.py  (c)2020 .. 2023  Henrique Moreira (part of 'mconfig')
 
-"""
-mswin -- Win32 OS utilities
+""" mswin -- Win32 OS utilities
+POSIX environments.
 """
 
 # pylint: disable=unused-argument, disable=missing-function-docstring
@@ -40,7 +40,11 @@ class Environ(OSEnv):
         self._init_env()
 
     def env(self, name):
-        return self._env[name]
+        """ Returns 'None' if the environment variable 'name' does not exist.
+        Or the resulting value.
+        Value can be a list, e.g. menv.env('path') should return a list.
+        """
+        return self._env.get(name)
 
     def envs(self):
         """ Returns the list of environments """
