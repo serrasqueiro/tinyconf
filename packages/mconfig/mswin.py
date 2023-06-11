@@ -42,20 +42,26 @@ class Environ(OSEnv):
     def env(self, name):
         return self._env[name]
 
+    def envs(self):
+        """ Returns the list of environments """
+        res = [(key, self._env[key]) for key in sorted(self._env)]
+        return res
+
     def _init_env(self):
         paths = os.environ["PATH"]
         if self.is_posix():
             pathlist = posix_path(paths.split(":"))
         else:
             pathlist = posix_path(paths.split(";"))
-        dct = {'home': self._get_home(),
-               'home-posix': posix_path(self._get_home()),
-               'appdata': "/usr/bin",
-               'localappdata': "/usr/local/bin",
-               'path': pathlist,
-               'wmp-data': "",
-               'tmp': Environ._get_tmp_path(),
-               }
+        dct = {
+            'home': self._get_home(),
+            'home-posix': posix_path(self._get_home()),
+            'appdata': "/usr/bin",
+            'localappdata': "/usr/local/bin",
+            'path': pathlist,
+            'wmp-data': "",
+            'tmp': Environ._get_tmp_path(),
+        }
         if os.environ.get("APPDATA"):
             appdata = posix_path(os.environ["APPDATA"])
             dct['appdata'] = appdata
@@ -87,9 +93,7 @@ class Environ(OSEnv):
 def posix_path(path):
     """ Returns the posix path: no backslashes """
     if isinstance(path, (list, tuple)):
-        res = list()
-        for this in path:
-            res.append(posix_path(this))
+        res = [posix_path(aba) for aba in path if aba.strip()]
         return res
     assert isinstance(path, str)
     assert path
