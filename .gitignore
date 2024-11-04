@@ -2,7 +2,7 @@ __pycache__/*
 *.pyc
 
 # Other
-todo.txt
+/todo.txt
 *~
 
 # CVS-related
